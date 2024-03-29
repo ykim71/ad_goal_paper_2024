@@ -4,8 +4,9 @@ library(pbapply)
 library(data.table)
 library(stringr)
 library(dplyr)
-#library(maps)
+library(tidyr)
 library(ggplot2)
+library(zoo)
 
 fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
 
@@ -47,4 +48,25 @@ fb22 <- fb22 %>%
 ggplot(fb22, aes(ad_delivery_start_time, value, color = name)) + geom_line()
 ggsave("figures/goals_over_time.pdf", width = 7, height = 4.5)
 
+
+# 7-day running average
+fb22 <- fb22 %>%
+  arrange(ad_delivery_start_time) %>%
+  group_by(name) %>%
+  mutate(rolling_average = rollapply(value, width = 7, FUN = mean, align = "right", fill = NA))
+
+ggplot(fb22, aes(ad_delivery_start_time, rolling_average, color = name)) + geom_line()
+ggsave("figures/goals_over_time_running_avg.pdf", width = 7, height = 4.5)
+
+#
+fb22 <- fb22[order(fb22$ad_delivery_start_time, fb22$name),]
+goal_total <- fb22 %>% group_by(name) %>% summarise(total = sum(value))
+fb22$value_norm <- fb22$value/goal_total$total
+
+fb22 <- fb22 %>%
+  arrange(ad_delivery_start_time) %>%
+  group_by(name) %>%
+  mutate(rolling_average_norm = rollapply(value_norm, width = 7, FUN = mean, align = "right", fill = NA))
+ggplot(fb22, aes(ad_delivery_start_time, rolling_average_norm, color = name)) + geom_line()
+ggsave("figures/goals_over_time_norm_running_avg.pdf", width = 7, height = 4.5)
 
