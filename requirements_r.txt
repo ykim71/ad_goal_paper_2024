@@ -1,0 +1,5 @@
+data.table 1.14.2
+stringr 1.4.0
+stringi 1.7.6
+dplyr 1.0.7
+tidyr 1.1.4
