@@ -72,6 +72,10 @@ for(i in 1:length(goals)){
   dfg[goals[i]] <- fs[['1']]$term[1:20]
 }
 
+dfg %>% rename(Acquisition = "Info")
+
+# rename and reorder columns
+dfg <- dfg %>% rename(Acquisition = "Info") %>% select("Acquisition", "Contact", "Donate", "Event", "Learn", "Poll", "Persuade", "Purchase", "Vote", "No goals")
 
 fwrite(dfg, "tables/fightin_words_goal_top_20.csv")
 print(xtable(dfg, 

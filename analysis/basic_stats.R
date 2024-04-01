@@ -15,15 +15,15 @@ rename_strings <- function(x) {
   ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
 }
 names(fb22_pred) <- rename_strings(names(fb22_pred))
+fb22_pred <- fb22_pred %>% select("ad_id", "Acquisition", "Contact", "Donate", "Event", "Learn", "Poll", "Persuade", "Purchase", "Vote")
 
-
-fb22_pred$Nogoals <- fb22_pred %>% select(-ad_id) %>% apply(., 1, function(x){all(x == 0)}) %>% as.numeric()
+fb22_pred$`No goals` <- fb22_pred %>% select(-ad_id) %>% apply(., 1, function(x){all(x == 0)}) %>% as.numeric()
 
 
 # Goal count
 # Ignore warning
 goal_count = fb22_pred %>%
-  summarise(across(c(Donate:Nogoals), list(mean = mean, sum = sum))) %>%
+  summarise(across(c(Acquisition:`No goals`), list(mean = mean, sum = sum))) %>%
   pivot_longer(cols = everything(), names_to = c(".value", "variable"), names_sep = "_") %>%
   t() %>%
   as.data.frame()
@@ -41,15 +41,15 @@ fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
   apply(., 1, function(x){mean(as.numeric(x))})
 fb22 <- left_join(fb22_pred, fb22_vars, by = "ad_id")
 
-ngoals <- fb22 %>% select(Donate:Nogoals) %>% apply(., 1, sum)
+ngoals <- fb22 %>% select(Acquisition:`No goals`) %>% apply(., 1, sum)
 spenddistr <- fb22$spend/ngoals
-spend_by_goal <- fb22 %>% select(Donate:Nogoals)
+spend_by_goal <- fb22 %>% select(Acquisition:`No goals`)
 spend_by_goal <- spend_by_goal * spenddistr
 spend_by_goal[is.na(spend_by_goal)] <- 0
 
 goal_total_spend <- apply(spend_by_goal, 2, sum)
 goal_total_spend = spend_by_goal %>%
-  summarise(across(c(Donate:Nogoals), list(sum = sum)))
+  summarise(across(c(Acquisition:`No goals`), list(sum = sum)))
 
 goal_total_spend <- t(goal_total_spend) %>% as.data.frame(.)
 names(goal_total_spend) <- "Spend"
@@ -87,11 +87,12 @@ sum(table(spend_by_goal$wmp_spontype))
 
 spend_by_goal <- spend_by_goal %>% filter(wmp_spontype %in% c('campaign', 'group', 'party', 'party national'))
 spend_by_goal$wmp_spontype[spend_by_goal$wmp_spontype == "party national"] <- "party"
-spontype_goals <- spend_by_goal %>% group_by(wmp_spontype) %>% summarise(across(.cols = Donate:Nogoals, .fns = sum, na.rm = TRUE))
+spontype_goals <- spend_by_goal %>% group_by(wmp_spontype) %>% summarise(across(.cols = Acquisition:`No goals`, .fns = sum, na.rm = TRUE))
 spontype_goals <- pivot_longer(spontype_goals, -wmp_spontype)
 
 names(spontype_goals) <- c("Sponsor type", "Goal", "Spend")
 spontype_goals$`Sponsor type` <- spontype_goals$`Sponsor type` %>% case_match("campaign" ~ "Campaign", "group" ~ "Group", "party" ~ "Party")
+spontype_goals$Goal <- factor(spontype_goals$Goal, levels = c(names(fb22_pred)[-1]))
 
 # Create a bar chart
 ggplot(spontype_goals, aes(x = Goal, y = Spend, fill = `Sponsor type`)) +
@@ -110,18 +111,19 @@ fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
   apply(., 1, function(x){mean(as.numeric(x))})
 fb22 <- left_join(fb22_pred, fb22_vars, by = "ad_id")
 
-ngoals <- fb22 %>% select(Donate:Nogoals) %>% apply(., 1, sum)
+ngoals <- fb22 %>% select(Acquisition:`No goals`) %>% apply(., 1, sum)
 spenddistr <- fb22$spend/ngoals
-spend_by_goal <- fb22 %>% select(Donate:Nogoals)
+spend_by_goal <- fb22 %>% select(Acquisition:`No goals`)
 spend_by_goal <- spend_by_goal * spenddistr
 spend_by_goal[is.na(spend_by_goal)] <- 0
 spend_by_goal$publisher_platforms <- fb22$publisher_platforms
 spend_by_goal <- spend_by_goal %>% filter(publisher_platforms %in% c('facebook', 'instagram'))
-platform_goals <- spend_by_goal %>% group_by(publisher_platforms) %>% summarise(across(.cols = Donate:Nogoals, .fns = sum, na.rm = TRUE))
+platform_goals <- spend_by_goal %>% group_by(publisher_platforms) %>% summarise(across(.cols = Acquisition:`No goals`, .fns = sum, na.rm = TRUE))
 platform_goals <- pivot_longer(platform_goals, -publisher_platforms)
 
 names(platform_goals) <- c("Platform", "Goal", "Spend")
 platform_goals$Platform <- platform_goals$Platform %>% case_match("facebook" ~ "Facebook", "instagram" ~ "Instagram")
+platform_goals$Goal <- factor(platform_goals$Goal, levels = c(names(fb22_pred)[-1]))
 
 # Create a bar chart
 ggplot(platform_goals, aes(x = Goal, y = Spend, fill = Platform)) +
