@@ -7,6 +7,7 @@ library(ggplot2)
 library(scales)
 library(xtable)
 library(maps)
+library(RColorBrewer)
 
 
 fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
@@ -93,7 +94,11 @@ names(goal_by_topsponsor) <- c("Page Name", "Goal", "Spend")
 goal_by_topsponsor$`Page Name` <- factor(goal_by_topsponsor$`Page Name`, rev(topsponsors))
 levels(goal_by_topsponsor$`Page Name`)[levels(goal_by_topsponsor$`Page Name`) == "NO on Prop 29 - Stop Yet Another Dangerous Dialysis Proposition"] <- "NO on Prop 29"
 
-ggplot(goal_by_topsponsor, aes(Spend, `Page Name`)) + geom_col(aes(fill = Goal)) + theme_bw() + theme(legend.position = "bottom") + ylab("") + scale_x_continuous(labels = label_number(scale_cut = cut_short_scale()))
+# Generate a colorblind-friendly color palette with 9 colors
+# display.brewer.all(n=9, type="qual", exact.n=TRUE, colorblindFriendly=T)
+color_palette <- brewer.pal(9, "Paired")
+
+ggplot(goal_by_topsponsor, aes(Spend, `Page Name`)) + geom_col(aes(fill = Goal)) + theme_bw() + theme(legend.position = "bottom") + ylab("") + scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) + scale_fill_manual(values = color_palette)
 ggsave("figures/goal_by_sponsor.pdf", height = 6, width = 7)
 
 # Top sponsors by goal

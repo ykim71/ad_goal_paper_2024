@@ -6,6 +6,7 @@ library(stringr)
 library(dplyr)
 #library(maps)
 library(ggplot2)
+library(RColorBrewer)
 
 fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
 
@@ -106,10 +107,14 @@ unique_labels <- unique(us_map_colors$goal)
 
 us_map_colors <- us_map_colors[order(us_map_colors$order),]
 
-# Create the map plot with the default ggplot2 color palette
+# Generate a colorblind-friendly color palette with 9 colors
+# display.brewer.all(n=9, type="qual", exact.n=TRUE, colorblindFriendly=T)
+color_palette <- brewer.pal(9, "Paired")
+
+# Create the map
 ggplot() +
   geom_polygon(data = us_map_colors, aes(x = long, y = lat, group = group, fill = factor(goal)), color = "white") +
-  scale_fill_discrete(name = "Goal") +
+  scale_fill_manual(values = color_palette, name = "Goal") +
   theme_void() +
   theme(legend.position = "bottom")
 ggsave("figures/map.pdf", width = 7, height = 4.5)
