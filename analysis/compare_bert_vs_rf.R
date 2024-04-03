@@ -27,6 +27,6 @@ results <- round(results, 3)
 results <- t(results)
 results <- results %>% as.data.frame() %>% select("Acquisition", "Contact", "Donate", "Event", "Learn", "Poll", "Persuade", "Purchase", "Vote")
 
-xt <- xtable(results, digits = 3, label = "model_performance", caption = "Model performance, DistilBERT and Random Forest.")
+xt <- xtable(results, digits = 3, label = "model_performance", caption = "Model performance (weighted F1 scores), DistilBERT and Random Forest.")
 print.xtable(xt, file = "tables/bert_vs_rf_performance.tex")
 
