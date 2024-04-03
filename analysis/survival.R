@@ -47,7 +47,8 @@ names(df_goals)[3] <- "Goal"
 
 # Generate a colorblind-friendly color palette with 9 colors
 # display.brewer.all(n=9, type="qual", exact.n=TRUE, colorblindFriendly=T)
-color_palette <- brewer.pal(9, "Paired")
+# color_palette <- brewer.pal(9, "Paired")
+color_palette <- c("#882255","#AA4398","#CC6577","#DDCC77","#88CBED","#45AB99","#107633","#322288","#13283E")
 
 ggplot(df_goals, aes(time, surv, color = Goal)) + 
   geom_step() + 
@@ -59,7 +60,7 @@ ggplot(df_goals, aes(time, surv, color = Goal)) +
   labs(x = "Ad runtime (days)", y = "Probability that ad is still running") +
   theme(legend.position = "bottom") +
   scale_color_manual(values = color_palette)
-ggsave("figures/goal_survival.pdf", width = 5, height = 5)
+ggsave("figures/goal_survival.pdf", width = 5.5, height = 5)
 
 
 # Survival probabilities mentioned in the paper

@@ -109,7 +109,8 @@ us_map_colors <- us_map_colors[order(us_map_colors$order),]
 
 # Generate a colorblind-friendly color palette with 9 colors
 # display.brewer.all(n=9, type="qual", exact.n=TRUE, colorblindFriendly=T)
-color_palette <- brewer.pal(9, "Paired")
+# color_palette <- brewer.pal(9, "Paired")
+color_palette <- c("#882255","#AA4398","#CC6577","#DDCC77","#88CBED","#45AB99","#107633","#322288","#13283E")
 
 # Create the map
 ggplot() +

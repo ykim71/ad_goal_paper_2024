@@ -96,7 +96,8 @@ levels(goal_by_topsponsor$`Page Name`)[levels(goal_by_topsponsor$`Page Name`) ==
 
 # Generate a colorblind-friendly color palette with 9 colors
 # display.brewer.all(n=9, type="qual", exact.n=TRUE, colorblindFriendly=T)
-color_palette <- brewer.pal(9, "Paired")
+# color_palette <- brewer.pal(9, "Paired")
+color_palette <- c("#882255","#AA4398","#CC6577","#DDCC77","#88CBED","#45AB99","#107633","#322288","#13283E")
 
 ggplot(goal_by_topsponsor, aes(Spend, `Page Name`)) + geom_col(aes(fill = Goal)) + theme_bw() + theme(legend.position = "bottom") + ylab("") + scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) + scale_fill_manual(values = color_palette)
 ggsave("figures/goal_by_sponsor.pdf", height = 6, width = 7)
