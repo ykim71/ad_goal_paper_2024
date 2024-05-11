@@ -88,6 +88,8 @@ sum(table(spend_by_goal$wmp_spontype))
 spend_by_goal <- spend_by_goal %>% filter(wmp_spontype %in% c('campaign', 'group', 'party', 'party national'))
 spend_by_goal$wmp_spontype[spend_by_goal$wmp_spontype == "party national"] <- "party"
 spontype_goals <- spend_by_goal %>% group_by(wmp_spontype) %>% summarise(across(.cols = Acquisition:`No goals`, .fns = sum, na.rm = TRUE))
+# Omit no goals since we don't discuss it in the paper
+spontype_goals <- spontype_goals %>% select(-`No goals`)
 spontype_goals <- pivot_longer(spontype_goals, -wmp_spontype)
 
 names(spontype_goals) <- c("Sponsor type", "Goal", "Spend")
@@ -119,6 +121,8 @@ spend_by_goal[is.na(spend_by_goal)] <- 0
 spend_by_goal$publisher_platforms <- fb22$publisher_platforms
 spend_by_goal <- spend_by_goal %>% filter(publisher_platforms %in% c('facebook', 'instagram'))
 platform_goals <- spend_by_goal %>% group_by(publisher_platforms) %>% summarise(across(.cols = Acquisition:`No goals`, .fns = sum, na.rm = TRUE))
+# Omit no goals since we don't discuss it in the paper
+platform_goals <- platform_goals %>% select(-`No goals`)
 platform_goals <- pivot_longer(platform_goals, -publisher_platforms)
 
 names(platform_goals) <- c("Platform", "Goal", "Spend")
