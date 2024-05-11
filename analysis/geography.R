@@ -4,7 +4,7 @@ library(pbapply)
 library(data.table)
 library(stringr)
 library(dplyr)
-#library(maps)
+library(scales)
 library(ggplot2)
 library(RColorBrewer)
 
@@ -122,19 +122,40 @@ ggsave("figures/map.pdf", width = 7, height = 4.5)
 
 
 # One map for each state
-# Prop of ad spending to a state by a given goal
+
+# Before that, add Learn which got left out above
+unique_labels <- sort(colnames(goal_by_state))
+
 goal_by_state_prop <- goal_by_state/apply(goal_by_state, 1, sum)
 goal_by_state_prop$state <- tolower(rownames(goal_by_state_prop))
+goal_by_state$state <- tolower(rownames(goal_by_state))
+
+us_map_colors1 <- merge(us_map, goal_by_state, by.x = "region", by.y = "state", all.x = TRUE)
+us_map_colors1 <- us_map_colors1[order(us_map_colors1$order),]
+
+# By absolute spend
+for(g in 1:length(unique_labels)) {
+  max_val <- max(us_map_colors1[unique_labels[g]], na.rm = T)
+  ggplot() +
+    geom_polygon(data = us_map_colors1, aes_string(x = "long", y = "lat", group = "group", fill = unique_labels[g]), color = "black") +
+    scale_fill_gradient(low = "white", high = color_palette[g], name = unique_labels[g],
+                        breaks = c(0, max_val/2, max_val),
+                        labels = label_number(scale = 1e-6, suffix = "M", accuracy = 0.1)) +
+    theme_void() +
+    theme(legend.position = "bottom")
+  ggsave(paste0("figures/map_", unique_labels[g], ".pdf"), width = 7, height = 4.5)
+}
 
 us_map_colors2 <- merge(us_map, goal_by_state_prop, by.x = "region", by.y = "state", all.x = TRUE)
 us_map_colors2 <- us_map_colors2[order(us_map_colors2$order),]
 
-for(g in unique_labels) {
+# Prop of ad spending to a state by a given goal
+for(g in 1:length(unique_labels)) {
   ggplot() +
-    geom_polygon(data = us_map_colors2, aes_string(x = "long", y = "lat", group = "group", fill = g), color = "white") +
-    scale_fill_gradient(name = g) +
+    geom_polygon(data = us_map_colors2, aes_string(x = "long", y = "lat", group = "group", fill = unique_labels[g]), color = "black") +
+    scale_fill_gradient(low = "white", high = color_palette[g], name = unique_labels[g]) +
     theme_void() +
     theme(legend.position = "bottom")
-  ggsave(paste0("figures/map_", g, ".pdf"), width = 7, height = 4.5)
+  #ggsave(paste0("figures/map_", unique_labels[g], "_prop.pdf"), width = 7, height = 4.5)
 }
 
