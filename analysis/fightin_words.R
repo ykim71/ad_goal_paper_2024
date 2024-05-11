@@ -76,6 +76,7 @@ dfg %>% rename(Acquisition = "Info")
 
 # rename and reorder columns
 dfg <- dfg %>% rename(Acquisition = "Info") %>% select("Acquisition", "Contact", "Donate", "Event", "Learn", "Poll", "Persuade", "Purchase", "Vote", "No goals")
+dfg <- dfg %>% rename(Acquisition = "Info") %>% select("Acquisition", "Contact", "Donate", "Event", "Learn", "Persuade", "Poll", "Purchase", "Vote", "No goals")
 
 fwrite(dfg, "tables/fightin_words_goal_top_20.csv")
 print(xtable(dfg, 

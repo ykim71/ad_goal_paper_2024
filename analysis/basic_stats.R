@@ -16,6 +16,7 @@ rename_strings <- function(x) {
 }
 names(fb22_pred) <- rename_strings(names(fb22_pred))
 fb22_pred <- fb22_pred %>% select("ad_id", "Acquisition", "Contact", "Donate", "Event", "Learn", "Poll", "Persuade", "Purchase", "Vote")
+fb22_pred <- fb22_pred %>% select("ad_id", "Acquisition", "Contact", "Donate", "Event", "Learn", "Persuade", "Poll", "Purchase", "Vote")
 
 fb22_pred$`No goals` <- fb22_pred %>% select(-ad_id) %>% apply(., 1, function(x){all(x == 0)}) %>% as.numeric()
 
