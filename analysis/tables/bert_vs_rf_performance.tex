@@ -1,15 +1,16 @@
 % latex table generated in R 4.3.3 by xtable 1.8-4 package
-% Mon Apr  1 14:11:57 2024
+% Thu May  9 15:22:01 2024
 \begin{table}[ht]
 \centering
-\begin{tabular}{rrrrrrrrrr}
+\begin{tabular}{rlllllllll}
   \hline
- & Acquisition & Contact & Donate & Event & Learn & Poll & Persuade & Purchase & Vote \\ 
+ & Acquisition & Contact & Donate & Event & Learn & Persuade & Poll & Purchase & Vote \\ 
   \hline
-BERT & 0.977 & 0.994 & 0.989 & 0.997 & 0.903 & 0.993 & 0.865 & 0.989 & 0.934 \\ 
-  RF & 0.968 & 0.987 & 0.986 & 0.992 & 0.839 & 0.991 & 0.851 & 0.990 & 0.930 \\ 
+BERT & 0.977 & 0.994 & 0.989 & 0.997 & 0.903 & 0.865 & 0.993 & 0.989 & 0.934 \\ 
+  RF & 0.968 & 0.987 & 0.986 & 0.992 & 0.839 & 0.851 & 0.991 & 0.990 & 0.930 \\ 
+  Label freq (0$|$1) & 686$|$49 & 729$|$6 & 608$|$127 & 731$|$4 & 360$|$375 & 292$|$443 & 724$|$11 & 684$|$51 & 649$|$86 \\ 
    \hline
 \end{tabular}
-\caption{Model performance, DistilBERT and Random Forest.} 
+\caption{Model performance (weighted F1 scores), DistilBERT and Random Forest. The third row indicates the frequencies of the 0/1 labels in the test set.} 
 \label{model_performance}
 \end{table}
