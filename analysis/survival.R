@@ -7,6 +7,10 @@ library(ggplot2)
 library(RColorBrewer)
 
 var1 <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
+
+# Count number of ads running from before 2022-09-05 (mentioned in footnote)
+length(which(as.Date(var1$ad_delivery_start_time) < as.Date("2022-09-05")))
+
 # Treat ads that end after 2022-11-08, or for which we don't know the stop time as right-censored on that day
 var1$ad_delivery_stop_time[as.Date(var1$ad_delivery_stop_time) > as.Date("2022-11-08")] <- "2022-11-08"
 var1$ad_delivery_stop_time[is.na(var1$ad_delivery_stop_time)] <- "2022-11-08"
