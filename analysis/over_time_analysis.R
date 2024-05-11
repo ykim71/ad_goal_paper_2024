@@ -45,6 +45,8 @@ fb22 <- fb22 %>%
   summarise(across(Donate:Persuade, \(x) sum(x, na.rm = TRUE))) %>%
   pivot_longer(-ad_delivery_start_time)
 
+# Remove ads from 11-01 onwards, since there was a moratorium on new ads
+fb22 <- fb22[fb22$ad_delivery_start_time < "2022-11-01",]
 
 # Colorblind-friendly colors
 color_palette <- c("#882255","#AA4398","#CC6577","#DDCC77","#88CBED","#45AB99","#107633","#322288","#13283E")
@@ -54,7 +56,8 @@ ggplot(fb22, aes(ad_delivery_start_time, value, color = name)) +
   geom_line() +
   theme_bw() +
   scale_color_manual(values = color_palette, name = "Goal") +
-  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)")
+  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)") +
+  theme(legend.position = "bottom")
 ggsave("figures/goals_over_time.pdf", width = 7, height = 4.5)
 
 
@@ -68,14 +71,23 @@ ggplot(fb22, aes(ad_delivery_start_time, rolling_average, color = name)) +
   geom_line() +
   theme_bw() +
   scale_color_manual(values = color_palette, name = "Goal") +
-  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)")
-ggsave("figures/goals_over_time_running_avg.pdf", width = 7, height = 4.5)
+  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)") +
+  theme(legend.position = "bottom")
+#ggsave("figures/goals_over_time_running_avg.pdf", width = 7, height = 4.5)
 
-# Goals over time normalized and running average
+# Goals on a given day as a proportion of each goal's total
 fb22 <- fb22[order(fb22$ad_delivery_start_time, fb22$name),]
 goal_total <- fb22 %>% group_by(name) %>% summarise(total = sum(value))
 fb22$value_norm <- fb22$value/goal_total$total
+ggplot(fb22, aes(ad_delivery_start_time, value_norm, color = name)) + 
+  geom_line() +
+  theme_bw() +
+  scale_color_manual(values = color_palette, name = "Goal") +
+  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)") +
+  theme(legend.position = "bottom")
+ggsave("figures/goals_over_time_norm.pdf", width = 7, height = 4.5)
 
+# 7-day running average of that
 fb22 <- fb22 %>%
   arrange(ad_delivery_start_time) %>%
   group_by(name) %>%
@@ -84,6 +96,34 @@ ggplot(fb22, aes(ad_delivery_start_time, rolling_average_norm, color = name)) +
   geom_line() +
   theme_bw() +
   scale_color_manual(values = color_palette, name = "Goal") +
-  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)")
-ggsave("figures/goals_over_time_norm_running_avg.pdf", width = 7, height = 4.5)
+  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)") +
+  theme(legend.position = "bottom")
+#ggsave("figures/goals_over_time_norm_running_avg.pdf", width = 7, height = 4.5)
 
+# Goals on a given day as a proportion of each goal's total
+# With spline smoothing
+
+smooth_spline <- function(df, spar_val = 0.8) {
+  # Ensure date is in numeric format for spline fitting
+  dates_numeric <- as.numeric(df$ad_delivery_start_time)
+  # Fit a smoothing spline
+  spline_fit <- smooth.spline(x = dates_numeric, y = df$value_norm, spar = spar_val)  # spar controls smoothness
+  # Use original numeric dates for interpolation
+  smoothed_values <- predict(spline_fit, x = dates_numeric)$y
+  # Return a data frame with the original dates and smoothed values
+  return(data.frame(ad_delivery_start_time = df$ad_delivery_start_time, smoothed_values = smoothed_values))
+}
+
+fb22_2 <- fb22 %>%
+  arrange(ad_delivery_start_time) %>%
+  group_by(name) %>%
+  group_modify(~smooth_spline(.x, .9)) %>%
+  ungroup()
+
+ggplot(fb22_2, aes(ad_delivery_start_time, smoothed_values, color = name)) + 
+  geom_line() +
+  theme_bw() +
+  scale_color_manual(values = color_palette, name = "Goal") +
+  labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)") +
+  theme(legend.position = "bottom")
+ggsave("figures/goals_over_time_spline_smoothing.pdf", width = 7, height = 5.5)
