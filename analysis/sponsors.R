@@ -34,6 +34,17 @@ fb22_vars2 <- fb22_vars2 %>% select(ad_id, page_name)
 fb22 <- left_join(fb22_vars, fb22_vars2, by = "ad_id")
 fb22 <- left_join(fb22, fb22_pred, by = "ad_id")
 
+# Add party & incumbency
+wmpent <- fread("../data/wmp_fb_2022_entities_v120122.csv")
+wmpent <- wmpent %>% 
+  filter((wmp_spontype == "campaign") & (wmp_office %in% c("us house", "us senate"))) %>% 
+  select(pd_id, wmp_office, party_all, hse_cdstatus, sen_cdstatus)
+wmpent$cdstatus <- wmpent$hse_cdstatus
+wmpent$cdstatus[wmpent$wmp_office == "us senate"] <- wmpent$sen_cdstatus[wmpent$wmp_office == "us senate"]
+wmpent <- wmpent %>% select(-c(hse_cdstatus, sen_cdstatus))
+wmpent <- wmpent %>% filter(cdstatus != "")
+fb22 <- left_join(fb22, wmpent, by = "pd_id")
+
 rm(list = ls()[ls() != "fb22"])
 
 #----
@@ -128,3 +139,102 @@ goal_var <- aggregate(goal_by_top100sponsor$value, by = list(goal_by_top100spons
 # is because some ads have no goals, and so they get excluded from topspenders
 # topspenders2 <- aggregate(fb22$spend, by = list(fb22$page_name), sum)
 
+#----
+# By candidate
+
+fb22_spend_by_goal_cand <- fb22_spend_by_goal %>% filter(is.na(wmp_office) == F)
+
+goal_by_party <- fb22_spend_by_goal_cand %>%
+  group_by(party_all) %>%
+  summarise(across(c(Donate:Persuade), sum)) %>%
+  filter(party_all != "OTHER")
+
+goal_by_party <- pivot_longer(goal_by_party, -party_all)
+
+names(goal_by_party) <- c("Party", "Goal", "Spend")
+goal_by_party$Party <- goal_by_party$Party %>% case_match("DEM" ~ "Democrat", "REP" ~ "Republican")
+goal_by_party$Goal <- factor(goal_by_party$Goal, levels = sort(unique(goal_by_party$Goal)))
+
+# Create a bar chart
+ggplot(goal_by_party, aes(x = Goal, y = Spend, fill = Party)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_bw() +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom") +
+  scale_fill_manual(values = c("Democrat" = "#377eb8", "Republican" = "#e41a1c"))
+ggsave("figures/goal_by_party.pdf", width = 6, height = 4)
+
+# As a proportion, to account for the Democratic advantage
+goal_by_party_prop <- fb22_spend_by_goal_cand %>%
+  group_by(party_all) %>%
+  summarise(across(c(Donate:Persuade), sum)) %>%
+  filter(party_all != "OTHER") %>%
+  mutate(Total = rowSums(across(where(is.numeric))))
+goal_by_party_prop <- goal_by_party_prop %>%
+  mutate(across(where(is.numeric), ~ .x / Total)) %>%
+  select(-Total)
+
+goal_by_party_prop <- pivot_longer(goal_by_party_prop, -party_all)
+
+names(goal_by_party_prop) <- c("Party", "Goal", "Spend")
+goal_by_party_prop$Party <- goal_by_party_prop$Party %>% case_match("DEM" ~ "Democrat", "REP" ~ "Republican")
+goal_by_party_prop$Goal <- factor(goal_by_party_prop$Goal, levels = sort(unique(goal_by_party_prop$Goal)))
+
+# Create a bar chart
+ggplot(goal_by_party_prop, aes(x = Goal, y = Spend, fill = Party)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_bw() +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom") +
+  scale_fill_manual(values = c("Democrat" = "#377eb8", "Republican" = "#e41a1c")) +
+  ylab("Spend (proportion of total party spend)")
+ggsave("figures/goal_by_party_prop.pdf", width = 6, height = 4)
+
+#----
+# By incumbency
+
+goal_by_incumbency <- fb22_spend_by_goal_cand %>%
+  group_by(cdstatus) %>%
+  summarise(across(c(Donate:Persuade), sum))
+
+goal_by_incumbency <- pivot_longer(goal_by_incumbency, -cdstatus)
+
+names(goal_by_incumbency) <- c("Incumbency", "Goal", "Spend")
+goal_by_incumbency$Incumbency <- str_to_title(goal_by_incumbency$Incumbency)
+goal_by_incumbency$Goal <- factor(goal_by_incumbency$Goal, levels = sort(unique(goal_by_incumbency$Goal)))
+
+# Create a bar chart
+ggplot(goal_by_incumbency, aes(x = Goal, y = Spend, fill = Incumbency)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_bw() +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
+ggsave("figures/goal_by_incumbency_mean.pdf", width = 6, height = 4)
+
+# As a proportion of candidate ad budget
+
+goal_by_incumbency_prop <- fb22_spend_by_goal_cand %>%
+  group_by(pd_id) %>%
+  summarise(across(c(Donate:Persuade), sum))
+goal_by_incumbency_prop[,2:ncol(goal_by_incumbency_prop)] <- goal_by_incumbency_prop[,2:ncol(goal_by_incumbency_prop)]/apply(goal_by_incumbency_prop[,2:ncol(goal_by_incumbency_prop)], 1, sum)
+goal_by_incumbency_prop <- goal_by_incumbency_prop[is.na(goal_by_incumbency_prop$Donate) == F,]
+goal_by_incumbency_prop <- left_join(goal_by_incumbency_prop, fb22_spend_by_goal_cand %>% select(pd_id, cdstatus))
+goal_by_incumbency_prop <- 
+  goal_by_incumbency_prop %>%
+  group_by(cdstatus) %>%
+  summarise(across(c(Donate:Persuade), mean))
+
+goal_by_incumbency_prop <- pivot_longer(goal_by_incumbency_prop, -cdstatus)
+
+names(goal_by_incumbency_prop) <- c("Incumbency", "Goal", "Spend")
+goal_by_incumbency_prop$Incumbency <- str_to_title(goal_by_incumbency_prop$Incumbency)
+goal_by_incumbency_prop$Goal <- factor(goal_by_incumbency_prop$Goal, levels = sort(unique(goal_by_incumbency_prop$Goal)))
+
+# Create a bar chart
+ggplot(goal_by_incumbency_prop, aes(x = Goal, y = Spend, fill = Incumbency)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_bw() +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom") +
+  ylab("Avg. proportion of candidate spend")
+ggsave("figures/goal_by_incumbency_prop.pdf", width = 6, height = 4)
