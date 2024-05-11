@@ -81,7 +81,7 @@ dfg <- dfg %>% select(-`No goals`)
 
 fwrite(dfg, "tables/fightin_words_goal_top_20.csv")
 print(xtable(dfg, 
-             caption = "Top 20 words most associated with a given goal.",
+             caption = "Top 20 keywords most associated with a given goal.",
              label = "tab:fightin_words"),
       "latex",
       "tables/fightin_words.tex",
