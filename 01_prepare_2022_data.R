@@ -8,8 +8,10 @@ library(tidyr)
 
 # Input data
 path_input_data <- "data/fb_2022_adid_text_clean.csv.gz"
+path_humancoded_input_data <- "data/fb2022_082224_partial.csv"
 # Output data
 path_output_data <- "data/fb2022_prepared.csv.gz"
+path_humancoded_output_data <- "data/fb2022_coded.csv.gz"
 
 # Load data
 df <- fread(path_input_data, encoding = 'UTF-8')
@@ -32,3 +34,18 @@ df$text <- str_replace_all(df$text, "\\\\n", " ")
 df$text <- str_squish(df$text)
 
 fwrite(df, path_output_data)
+
+#----
+
+# For the ads that have human-coding, clean up the data and merge with the text
+df_hc <- fread(path_humancoded_input_data, encoding = 'UTF-8')
+df_hc <- df_hc %>% select(adid, DONATE:PRIMARY_PERSUADE)
+df_hc$adid <- str_remove(df_hc$adid, "\\\\")
+df_hc$adid <- str_remove(df_hc$adid, "\\\"\\\"\\)")
+df_hc[df_hc==""] <- 0
+df_hc$PRIMARY_PERSUADE[df_hc$PRIMARY_PERSUADE == "No, primary goal is something else"] <- 0
+df_hc <- df_hc %>% mutate(across(DONATE:PRIMARY_PERSUADE, ~ ifelse(. != 0, 1, 0)))
+df_hc$text <- df$text[match(df_hc$adid, df$ad_id)]
+df_hc <- df_hc %>% relocate(text, .after = adid)
+
+fwrite(df_hc, path_humancoded_output_data)
