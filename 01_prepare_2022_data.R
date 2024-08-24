@@ -47,5 +47,6 @@ df_hc$PRIMARY_PERSUADE[df_hc$PRIMARY_PERSUADE == "No, primary goal is something 
 df_hc <- df_hc %>% mutate(across(DONATE:PRIMARY_PERSUADE, ~ ifelse(. != 0, 1, 0)))
 df_hc$text <- df$text[match(df_hc$adid, df$ad_id)]
 df_hc <- df_hc %>% relocate(text, .after = adid)
+df_hc <- df_hc %>% rename(ad_id = adid)
 
 fwrite(df_hc, path_humancoded_output_data)
