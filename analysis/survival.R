@@ -58,8 +58,9 @@ ggplot(df_goals, aes(time, surv, color = Goal)) +
   geom_step() + 
   ylim(0,1) + 
   xlim(0,200) + # cut off after 200 days
-  geom_vline(xintercept = 7, lty = 2, alpha = 0.5) + # dashed line at 1 week
-  geom_vline(xintercept = 30, lty = 2, alpha = 0.5) + # dashed line at 1 month
+  scale_x_continuous(trans='log10', limits = c(1,200), breaks = c(1:7, 14, 21, 28, 100, 200)) +
+  #geom_vline(xintercept = 7, lty = 2, alpha = 0.5) + # dashed line at 1 week
+  #geom_vline(xintercept = 30, lty = 2, alpha = 0.5) + # dashed line at 1 month
   theme_bw() +
   labs(x = "Ad runtime (days)", y = "Probability that ad is still running") +
   theme(legend.position = "bottom") +
