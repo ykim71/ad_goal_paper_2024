@@ -6,6 +6,7 @@ library(stringr)
 library(stringi)
 library(dplyr)
 library(tidyr)
+library(haven)
 
 
 #-------------------------------------------------------------------------------
@@ -93,15 +94,10 @@ rm(list = ls())
 # Part 1 prepares the ads themselves
 # Part 2 cleans up the human coding and merges the respective ads into it
 
-library(data.table)
-library(stringr)
-library(stringi)
-library(dplyr)
-library(tidyr)
-
 # Input data
 path_input_data <- "data/fb_2022_adid_text_clean.csv.gz"
 path_humancoded_input_data <- "data/fb2022_082224_partial.csv"
+path_humancoded_input_data <- "data/FBEL_092924.dta"
 # Output data
 path_output_data <- "data/fb2022_inference.csv.gz"
 path_humancoded_output_data <- "data/handcoded_2022.csv"
@@ -127,13 +123,13 @@ fwrite(df, path_output_data)
 # Part 2
 
 # For the ads that have human-coding, clean up the data and merge with the text
-df_hc <- fread(path_humancoded_input_data, encoding = 'UTF-8')
+df_hc <- read_dta(path_humancoded_input_data)
+# Noncandidate ads weren't coded for goal, remove them
+df_hc <- df_hc %>% filter(CAND1 != "")
 df_hc <- df_hc %>% select(adid, DONATE:PRIMARY_PERSUADE)
-df_hc$adid <- str_remove(df_hc$adid, "\\\\")
-df_hc$adid <- str_remove(df_hc$adid, "\\\"\\\"\\)")
-df_hc[df_hc==""] <- 0
-df_hc$PRIMARY_PERSUADE[df_hc$PRIMARY_PERSUADE == "No, primary goal is something else"] <- 0
-df_hc <- df_hc %>% mutate(across(DONATE:PRIMARY_PERSUADE, ~ ifelse(. != 0, 1, 0)))
+df_hc$PRIMARY_PERSUADE <- abs(df_hc$PRIMARY_PERSUADE-2)
+df_hc[is.na(df_hc)] <- 0
+# Merge with text data
 df_hc <- left_join(df_hc, df, by = c("adid" = "ad_id"))
 df_hc <- df_hc %>% rename(ad_id = adid)
 
