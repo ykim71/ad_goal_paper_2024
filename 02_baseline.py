@@ -68,8 +68,10 @@ for f in fields:
     #df_perf = pd.read_csv(results_dir + "/" + model_name + "/" + g + "" + f + '.csv')
     df_combined_perf.at[f,g] = df_perf.iloc[2,1]
     df_combined_perf_weighted_f1.at[f,g] = df_perf['weighted_avg'][2]
+    
     # Save model to disk
-    #dump(clf_rf, 'models/goal_rf_' + g + '.joblib')
+    if field == 'combined_everything':
+      dump(clf_rf, 'models/goal_rf_' + g + "_" + f + '.joblib', compress = 3)
 
 
 df_combined_perf.to_csv("performance/rf_2020_2022_feature_comparison_class1.csv")
