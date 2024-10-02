@@ -31,6 +31,7 @@ os.makedirs(os.path.dirname(results_dir + "/" + model_name + "/"), exist_ok=True
 
 goals = ["DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"]
 
+# Try out different ways to concatenate
 text_order1 = ['ad_creative_body', 'asr', 'ocr', 'ocr_vid']
 text_order2 = ['ad_creative_body', 'asr', 'ocr', 'ocr_vid', 'page_name', 'disclaimer', 'ad_creative_link_caption', 'ad_creative_link_title', 'ad_creative_link_description']
 
@@ -50,6 +51,7 @@ df_combined_perf_weighted_f1 = pd.DataFrame(np.nan, index=fields, columns=goals)
 for f in fields:
   for g in goals:
     
+    # Train model and predict on test set
     train_clean = train[[g,f]]
     train_clean = train_clean.dropna()
     test_clean = test[[g,f]]
@@ -57,20 +59,19 @@ for f in fields:
     clf_rf.fit(train_clean[f], train_clean[g])
     predicted = clf_rf.predict(test_clean[f])
     
-    #print(metrics.classification_report(test[g], predicted))
-    
+    # Performance metrics
     df_perf = pd.DataFrame(metrics.precision_recall_fscore_support(test_clean[g], predicted))
     df_perf['weighted_avg'] = pd.DataFrame(metrics.precision_recall_fscore_support(test_clean[g], predicted, average = "weighted"))
-    df_perf = np.round(df_perf, 2)
+    df_perf = np.round(df_perf, 3)
     df_perf.index = ['Precision', 'Recall', 'F-Score', 'Support']
     df_perf.to_csv(results_dir + "/" + model_name + "/" + g + "_" + f + '.csv')
     
-    #df_perf = pd.read_csv(results_dir + "/" + model_name + "/" + g + "" + f + '.csv')
+    # Write metrics into combined dataframe
     df_combined_perf.at[f,g] = df_perf.iloc[2,1]
-    df_combined_perf_weighted_f1.at[f,g] = df_perf['weighted_avg'][2]
+    df_combined_perf_weighted_f1.at[f,g] = df_perf.loc['F-Score','weighted_avg']
     
     # Save model to disk
-    if field == 'combined_everything':
+    if f == 'combined_everything':
       dump(clf_rf, 'models/goal_rf_' + g + "_" + f + '.joblib', compress = 3)
 
 
