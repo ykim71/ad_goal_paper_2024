@@ -82,8 +82,8 @@ ggplot(fb22_age[fb22_age$Info == 1,], aes(age)) + geom_density()
 ggplot(fb22_age[fb22_age$Learn == 1,], aes(age)) + geom_density()
 ggplot(fb22_age[fb22_age$Persuade == 1,], aes(age)) + geom_density()
 
-mean(fb22_age$age[fb22_age$Donate == 1])
-mean(fb22_age$age[fb22_age$Vote == 1])
+mean(fb22_age$age[fb22_age$Donate == 1], na.rm = T)
+mean(fb22_age$age[fb22_age$Vote == 1], na.rm = T)
 mean(fb22_age$age[fb22_age$Learn == 1], na.rm = T)
 
 fb22_age_df <- fb22_age %>% select(Donate:Persuade) %>% as.matrix(.) * fb22_age$age
