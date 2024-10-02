@@ -31,8 +31,8 @@ os.makedirs(os.path.dirname(results_dir + "/" + model_name + "/"), exist_ok=True
 
 goals = ["DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"]
 
-text_order1 = ['ad_creative_body', 'asr', 'ocr']
-text_order2 = ['ad_creative_body', 'asr', 'ocr', 'page_name', 'disclaimer', 'ad_creative_link_caption', 'ad_creative_link_title', 'ad_creative_link_description']
+text_order1 = ['ad_creative_body', 'asr', 'ocr', 'ocr_vid']
+text_order2 = ['ad_creative_body', 'asr', 'ocr', 'ocr_vid', 'page_name', 'disclaimer', 'ad_creative_link_caption', 'ad_creative_link_title', 'ad_creative_link_description']
 
 train['combined_text'] = train[text_order1].apply(lambda row: ' '.join(row.dropna().astype(str).replace('', None).dropna()), axis=1)
 test['combined_text'] = test[text_order1].apply(lambda row: ' '.join(row.dropna().astype(str).replace('', None).dropna()), axis=1)
