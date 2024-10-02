@@ -1,4 +1,4 @@
 ,DONATE,CONTACT,PURCHASE,GOTV,EVENT,POLL,GATHERINFO,LEARNMORE,PRIMARY_PERSUADE
-ad_creative_body,0.91,,,,,,,,
-combined_text,,,,,,,,,
-combined_everything,,,,,,,,,
+ad_creative_body,0.911,0.32,0.824,0.585,0.759,0.537,0.555,0.834,0.893
+combined_text,0.917,0.174,0.819,0.67,0.714,0.591,0.625,0.829,0.902
+combined_everything,0.945,0.333,0.881,0.688,0.8,0.681,0.651,0.845,0.906
