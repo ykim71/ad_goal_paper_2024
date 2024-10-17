@@ -101,8 +101,16 @@ ggplot(spontype_goals, aes(x = Goal, y = Spend, fill = `Sponsor type`)) +
   geom_bar(stat = "identity", position = "dodge") +
   theme_bw() +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
-ggsave("figures/goal_by_spontype.pdf", width = 6, height = 4)
+  xlab(NULL) +
+  theme(
+    axis.text.x = element_text(angle = 30, hjust = 1, size = 8),
+    legend.position = "bottom",
+    legend.margin = margin(t = -10),
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.3, "cm")
+  )
+ggsave("figures/goal_by_spontype.pdf", width = 6, height = 2.5)
 
 
 # FB vs Insta
@@ -134,6 +142,14 @@ ggplot(platform_goals, aes(x = Goal, y = Spend, fill = Platform)) +
   geom_bar(stat = "identity", position = "dodge") +
   theme_bw() +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
-ggsave("figures/goal_by_platform.pdf", width = 6, height = 4)
+  xlab(NULL) +
+  theme(
+    axis.text.x = element_text(angle = 30, hjust = 1, size = 8),
+    legend.position = "bottom",
+    legend.margin = margin(t = -10),
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.3, "cm")
+  )
+ggsave("figures/goal_by_platform.pdf", width = 6, height = 2.5)
 

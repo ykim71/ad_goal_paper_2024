@@ -1,34 +1,60 @@
 library(data.table)
 library(dplyr)
-library(tidyr)
-library(stringr)
 library(xtable)
 
-paths <- list.files("../performance", pattern = ".csv", recursive = T)
-dirs <- dirname(paths)
-files <- basename(paths)
-files <- str_remove(files, ".csv")
+rf_results <- fread("../performance/rf_2020_2022_feature_comparison_weighted.csv", data.table = F)
+bert_results <- fread("../performance/bert_2020_2022_feature_comparison_weighted.csv", data.table = F)
 
-results <- data.frame(matrix(nrow = length(paths)/2, ncol = 3))
-names(results) <- c(unique(dirs), "labels")
-rownames(results) <- unique(files)
-
-for (f in 1:length(paths)){
-  
-  df <- fread(paste0("../performance/", paths[f]))
-  overall_f1 <- ((df$V2[4]*df$V2[5]) + (df$V3[4]*df$V3[5])) / sum(df[5,2:3])
-  results[which(rownames(results) == files[f]), dirs[f]] <- overall_f1
-  results[which(rownames(results) == files[f]), 3] <- paste(df$V2[5], df$V3[5], sep = "|")
-  
+results <- rbind(bert_results, rf_results[3,])
+results <- results %>% select(-V1)
+goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
+                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
+rename_strings <- function(x) {
+  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
 }
-
-names(results) <- c("BERT", "RF", "Label freq (0|1)")
-rownames(results) <- c("Contact", "Donate", "Event", "Acquisition", "Vote", "Learn", "Poll", "Persuade", "Purchase")
-results[,1:2] <- round(results[,1:2], 3)
-results <- t(results)
-results <- results %>% as.data.frame() %>% select("Acquisition", "Contact", "Donate", "Event", "Learn", "Poll", "Persuade", "Purchase", "Vote")
+names(results) <- rename_strings(names(results))
 results <- results[,order(colnames(results))]
+rownames(results) <- c("DistilBERT", "Random Forest")
+
+xt <- xtable(results, digits = 3, label = "model_performance", caption = "DistilBERT and Random Forest classifier performance given as weighted F1 scores. Generally, the DistilBERT classifiers outperformed the Random Forest classifiers reaching a mean F1 score of 0.95 across classifiers.")
+print.xtable(xt, file = "tables/bert_vs_rf_performance.tex")
+
 mean(as.numeric(results[1,])) # average F1-score reported in the paper
 
-xt <- xtable(results, digits = 3, label = "model_performance", caption = "Model performance (weighted F1 scores), DistilBERT and Random Forest. The third row indicates the frequencies of the 0/1 labels in the test set.")
-print.xtable(xt, file = "tables/bert_vs_rf_performance.tex")
+
+#----
+rf_results <- fread("../performance/rf_2020_2022_feature_comparison_class1.csv", data.table = F)
+bert_results <- fread("../performance/bert_2020_2022_feature_comparison_class1.csv", data.table = F)
+
+results <- rbind(bert_results, rf_results[3,])
+results <- results %>% select(-V1)
+goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
+                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
+rename_strings <- function(x) {
+  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
+}
+names(results) <- rename_strings(names(results))
+results <- results[,order(colnames(results))]
+rownames(results) <- c("DistilBERT", "Random Forest")
+
+xt <- xtable(results, digits = 3, label = "model_performance_positive", caption = "DistilBERT and Random Forest classifier performance given as F1 scores of the positive cases. Generally, the DistilBERT classifiers outperformed the Random Forest classifiers reaching a mean F1 score of 0.81 across classifiers.")
+print.xtable(xt, file = "tables/bert_vs_rf_performance_positive.tex")
+
+mean(as.numeric(results[1,])) # average F1-score reported in the paper
+
+
+#----
+results <- fread("../performance/rf_2020_2022_feature_comparison_weighted.csv", data.table = F)
+results <- results %>% select(-V1)
+goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
+                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
+rename_strings <- function(x) {
+  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
+}
+names(results) <- rename_strings(names(results))
+results <- results[,order(colnames(results))]
+rownames(results) <-  c("Ad creative body", "Ad creative body + ASR + OCR", "All fields")
+
+xt <- xtable(results, digits = 3, label = "model_performance_feature_comparison", caption = "Random Forest classifier performance for different feature sets, given as weighted F1 scores.")
+print.xtable(xt, file = "tables/rf_performance_features.tex")
+

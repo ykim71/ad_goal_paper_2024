@@ -185,10 +185,19 @@ ggplot(goal_by_party_prop, aes(x = Goal, y = Spend, fill = Party)) +
   geom_bar(stat = "identity", position = "dodge") +
   theme_bw() +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom") +
   scale_fill_manual(values = c("Democrat" = "#377eb8", "Republican" = "#e41a1c")) +
-  ylab("Spend (proportion of total party spend)")
-ggsave("figures/goal_by_party_prop.pdf", width = 6, height = 4)
+  xlab(NULL) +
+  ylab("Spend (proportion of total party spend)") +
+  theme(
+    axis.text.x = element_text(angle = 30, hjust = 1, size = 8),
+    axis.title.y = element_text(size = 8),
+    legend.position = "bottom",
+    legend.margin = margin(t = -10),
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.3, "cm")
+  )
+ggsave("figures/goal_by_party_prop.pdf", width = 6, height = 2.5)
 
 #----
 # By incumbency
@@ -208,8 +217,16 @@ ggplot(goal_by_incumbency, aes(x = Goal, y = Spend, fill = Incumbency)) +
   geom_bar(stat = "identity", position = "dodge") +
   theme_bw() +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom")
-ggsave("figures/goal_by_incumbency_mean.pdf", width = 6, height = 4)
+  xlab(NULL) +
+  theme(
+    axis.text.x = element_text(angle = 30, hjust = 1, size = 8),
+    legend.position = "bottom",
+    legend.margin = margin(t = -10),
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.3, "cm")
+  )
+ggsave("figures/goal_by_incumbency_mean.pdf", width = 6, height = 2.5)
 
 # As a proportion of candidate ad budget
 
@@ -235,6 +252,13 @@ ggplot(goal_by_incumbency_prop, aes(x = Goal, y = Spend, fill = Incumbency)) +
   geom_bar(stat = "identity", position = "dodge") +
   theme_bw() +
   scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "bottom") +
-  ylab("Avg. proportion of candidate spend")
-ggsave("figures/goal_by_incumbency_prop.pdf", width = 6, height = 4)
+  xlab(NULL) +
+  theme(
+    axis.text.x = element_text(angle = 30, hjust = 1, size = 8),
+    legend.position = "bottom",
+    legend.margin = margin(t = -10),
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.3, "cm")
+  )
+ggsave("figures/goal_by_incumbency_prop.pdf", width = 6, height = 2.5)

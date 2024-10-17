@@ -126,8 +126,20 @@ ggsave("figures/map.pdf", width = 7, height = 4.5)
 # Before that, add Learn which got left out above
 unique_labels <- sort(colnames(goal_by_state))
 
-goal_by_state_prop <- goal_by_state/apply(goal_by_state, 1, sum)
-goal_by_state_prop$state <- tolower(rownames(goal_by_state_prop))
+# Account for state population
+turnout <- fread("../data/Turnout_1980_2022_v1.0.csv")
+turnout <- turnout %>% 
+  filter(YEAR == 2022, !STATE %in% c("United States", "District of Columbia")) %>% 
+  select(STATE, TOTAL_BALLOTS_COUNTED) %>%
+  mutate(TOTAL_BALLOTS_COUNTED = as.numeric(str_remove_all(TOTAL_BALLOTS_COUNTED, ","))) %>%
+  mutate(STATE = tolower(STATE)) %>%
+  arrange(STATE)
+
+goal_by_state <- goal_by_state[rownames(goal_by_state) != "Other",]
+goal_by_state <- goal_by_state/turnout$TOTAL_BALLOTS_COUNTED
+
+#goal_by_state_prop <- goal_by_state/apply(goal_by_state, 1, sum)
+#goal_by_state_prop$state <- tolower(rownames(goal_by_state_prop))
 goal_by_state$state <- tolower(rownames(goal_by_state))
 
 us_map_colors1 <- merge(us_map, goal_by_state, by.x = "region", by.y = "state", all.x = TRUE)
@@ -140,7 +152,7 @@ for(g in 1:length(unique_labels)) {
     geom_polygon(data = us_map_colors1, aes_string(x = "long", y = "lat", group = "group", fill = unique_labels[g]), color = "black") +
     scale_fill_gradient(low = "white", high = color_palette[g], name = unique_labels[g],
                         breaks = c(0, max_val/2, max_val),
-                        labels = label_number(scale = 1e-6, suffix = "M", accuracy = 0.1)) +
+                        labels = label_number(scale = 1, accuracy = 0.01)) +
     theme_void() +
     theme(legend.position = "bottom")
   ggsave(paste0("figures/map_", unique_labels[g], ".pdf"), width = 7, height = 4.5)
