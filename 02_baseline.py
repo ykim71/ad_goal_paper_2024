@@ -18,6 +18,9 @@ df = pd.read_csv('data/humancoded_2020_2022.csv.gz', encoding = 'UTF-8')
 # Split
 train, test = ms.train_test_split(df, test_size=0.2, random_state=123, stratify = df['year'])
 
+print(np.round(train['year'].value_counts() / len(train), 3))
+print(np.round(test['year'].value_counts() / len(test), 3))
+
 results_dir = 'performance'
 
 clf_rf = Pipeline([('vect', CountVectorizer()),
