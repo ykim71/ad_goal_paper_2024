@@ -28,3 +28,22 @@ for g in goals:
 
 df_combined_perf.to_csv("performance/bert_2020_2022_feature_comparison_class1.csv")
 df_combined_perf_weighted_f1.to_csv("performance/bert_2020_2022_feature_comparison_weighted.csv")
+
+
+# Calculate micro F1 score and then weigh by support
+combined_micro_f1 = []
+
+# Loop through 'goals' and append one-row DataFrames
+for g in goals:
+    combined_micro_f1.append(pd.DataFrame(
+        data = {'micro_f1': [metrics.f1_score(test[g], test_pred[g], average="micro")], 
+                'support': [test[g].sum()]}, 
+        index = [g]
+    ))
+
+# Concatenate the list of DataFrames
+combined_df = pd.concat(combined_micro_f1)
+
+weighted_micro_f1 = (combined_df['micro_f1']*combined_df['support']).sum()/combined_df['support'].sum()
+
+
