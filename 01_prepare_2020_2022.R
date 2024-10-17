@@ -160,5 +160,8 @@ df_hc_2022$year <- 2022
 df_hc <- bind_rows(df_hc_2020, df_hc_2022)
 df_hc <- df_hc %>% relocate(ocr_vid, .after = ocr)
 
+# Report number of ads per cycle in the paper
+table(df_hc$year)
+
 fwrite(df_hc, path_output_data)
 
