@@ -34,11 +34,7 @@ goal_count$Sum <- as.numeric(goal_count$Sum)
 
 
 # Goal spend
-fb22_vars <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
-fb22_vars <- fb22_vars %>% select(ad_id, page_id, pd_id, spend)
-fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
-  apply(., 2, function(x){str_extract(x, "[0-9]+")}) %>%
-  apply(., 1, function(x){mean(as.numeric(x))})
+load("../data/fb_2022_adid_var_clean.rdata")
 fb22 <- left_join(fb22_pred, fb22_vars, by = "ad_id")
 
 ngoals <- fb22 %>% select(Acquisition:`No goals`) %>% apply(., 1, sum)
