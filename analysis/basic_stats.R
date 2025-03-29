@@ -71,7 +71,7 @@ print(xt,
 
 # Candidates vs. outside groups
 
-wmpent <- fread("../data/wmp_fb_2022_entities_v120122.csv", data.table = F)
+load("../data/wmpentities_2022.rdata")
 wmpent <- wmpent %>% select(pd_id, wmp_spontype)
 
 fb22 <- left_join(fb22, wmpent, by = "pd_id")
