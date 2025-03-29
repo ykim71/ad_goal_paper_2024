@@ -107,7 +107,7 @@ path_humancoded_output_data <- "data/handcoded_2022.csv"
 
 # Load data
 df <- fread(path_input_data, encoding = 'UTF-8')
-df <- df %>% select(-c(ad_creative_bodies, ad_creative_link_captions, ad_creative_link_titles, ad_creative_link_descriptions, checksum))
+df <- df %>% select(-c(ad_creative_bodies, ad_snapshot_url, ad_creative_link_captions, ad_creative_link_titles, ad_creative_link_descriptions, checksum))
 
 # Example cleaning for multiple text columns (replace 'text' with your column names)
 df <- df %>%
