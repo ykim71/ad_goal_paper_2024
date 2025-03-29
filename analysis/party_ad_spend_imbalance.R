@@ -1,9 +1,8 @@
-# Democratic candidates spent 25,344,037 on FB ads in 2022
-# compared to only 6,756,382 for Republican candidates
-
-# Required files:
-# fb_2022_adid_var1.csv.gz -- download from here: https://drive.google.com/file/d/1y1iiEbijdAMl73oWnU7lzf3-LjZ2SAto/view?usp=drive_link
-# wmp_fb_2022_entities_v120122.csv -- download from here: https://github.com/Wesleyan-Media-Project/datasets/raw/main/wmp_entity_files/Facebook/2022/wmp_fb_2022_entities_v120122.csv
+#   party_all    spend
+#   <chr>        <dbl>
+# 1 DEM       25496238
+# 2 OTHER       290401
+# 3 REP        6803407
 
 library(dplyr)
 library(stringr)
