@@ -124,8 +124,7 @@ df <- df %>%
 fwrite(df, path_output_data2)
 
 # Concatenate and save again
-df2 <- df %>%
-  mutate(text = paste(ad_creative_body, google_asr_text, aws_ocr_text_img, aws_ocr_text_vid, page_name, disclaimer, ad_creative_link_caption, ad_creative_link_title, ad_creative_link_description, sep = " "))
+df2 <- df %>% unite(text, ad_creative_body, google_asr_text, aws_ocr_text_img, aws_ocr_text_vid, page_name, disclaimer, ad_creative_link_caption, ad_creative_link_title, ad_creative_link_description, sep = " ", na.rm = T)
 fwrite(df2, path_output_data1)
 
 #----
