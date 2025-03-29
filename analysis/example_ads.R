@@ -20,7 +20,7 @@ rename_strings <- function(x) {
 names(fb22_pred) <- rename_strings(names(fb22_pred))
 
 # Merge in text
-fb22_text <- fread("../data/fb2022_inference.csv.gz", data.table = F)
+fb22_text <- fread("../data/fb2022_inference_separate_fields.csv.gz", data.table = F)
 fb22_text_all <- fb22_text
 fb22_text <- fb22_text %>% select(ad_id, page_name, ad_creative_body)
 
