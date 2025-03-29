@@ -15,6 +15,7 @@ fb22_vars$publisher_platforms <- str_replace_all(fb22_vars$publisher_platforms, 
 fb22_vars$publisher_platforms <- str_replace_all(fb22_vars$publisher_platforms, "\\]", "")
 fb22_vars$publisher_platforms <- str_split(fb22_vars$publisher_platforms, ",")
 
+
 #----
 
 extract_region <- function(x){
@@ -54,11 +55,30 @@ save(fb22_vars, file = "../data/fb_2022_adid_var_clean.rdata")
 # Prepare entity file
 library(haven)
 wmpent <- read_dta("../data/wmpentity_2022_012125_mergedFECids.dta")
-# wmpent <- wmpent %>% 
-#   filter((wmp_spontype == "campaign") & (wmp_office %in% c("us house", "us senate")))
 
-# incumbency variables missing right now
-wmpent <- wmpent %>% select(pd_id, wmp_spontype, wmp_office, party_all)#, hse_cdstatus, sen_cdstatus)
+# Merge in incumbency
+cands <- fread("../../datasets/candidates/wmpcand_120223_wmpid.csv")
+cands <- cands %>% select(wmpid, cand_incumbent_challenger_open_s)
+cands <- cands %>% rename(incumbency = "cand_incumbent_challenger_open_s")
+cands <- cands %>% filter(incumbency != "")
+# Remove duplicates
+# First sort cands so that INCUMBENT and CHALLENGER come before OPEN and ""
+# (this will keep incumbent and open over the other 2)
+cands <- cands %>% mutate(incumbency = factor(incumbency, levels = c("INCUMBENT", "CHALLENGER", "OPEN", "")))
+cands <- cands[order(cands$incumbency),]
+cands <- cands[!duplicated(cands$wmpid),]
+# Merge
+wmpent <- left_join(wmpent, cands, by = "wmpid")
+
+wmpent <- wmpent %>% select(pd_id, wmp_spontype, wmp_office, party_all, incumbency)
+wmpent[wmpent == ""] <- NA
+
+# Michael Young
+wmpent$wmp_office[wmpent$pd_id == "pd-108849960534235-2"] <- "down ballot"
+wmpent$party_all[wmpent$pd_id == "pd-108849960534235-2"] <- "OTHER"
+
+ # Steven Sams
+wmpent$party_all[wmpent$pd_id == "pd-105150411869111-1"] <- "REP"
+wmpent$incumbency[wmpent$pd_id == "pd-105150411869111-1"] <- "CHALLENGER"
+
 save(wmpent, file = "../data/wmpentities_2022.rdata")
-
-# test = fread("../data/wmp_fb_2022_entities_v120122.csv", data.table = F)
