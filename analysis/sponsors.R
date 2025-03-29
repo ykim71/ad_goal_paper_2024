@@ -22,11 +22,8 @@ names(fb22_pred) <- rename_strings(names(fb22_pred))
 
 
 # Combine relevant vars from multiple datasets
-fb22_vars <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
+load("../data/fb_2022_adid_var_clean.rdata")
 fb22_vars <- fb22_vars %>% select(ad_id, page_id, pd_id, spend)
-fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
-  apply(., 2, function(x){str_extract(x, "[0-9]+")}) %>%
-  apply(., 1, function(x){mean(as.numeric(x))})
 
 fb22_vars2 <- fread("../../fb_2022/fb_2022_adid_text.csv.gz", data.table = F)
 fb22_vars2 <- fb22_vars2 %>% select(ad_id, page_name)
@@ -35,14 +32,11 @@ fb22 <- left_join(fb22_vars, fb22_vars2, by = "ad_id")
 fb22 <- left_join(fb22, fb22_pred, by = "ad_id")
 
 # Add party & incumbency
-wmpent <- fread("../data/wmp_fb_2022_entities_v120122.csv")
+load("../data/wmpentities_2022.rdata")
 wmpent <- wmpent %>% 
   filter((wmp_spontype == "campaign") & (wmp_office %in% c("us house", "us senate"))) %>% 
-  select(pd_id, wmp_office, party_all, hse_cdstatus, sen_cdstatus)
-wmpent$cdstatus <- wmpent$hse_cdstatus
-wmpent$cdstatus[wmpent$wmp_office == "us senate"] <- wmpent$sen_cdstatus[wmpent$wmp_office == "us senate"]
-wmpent <- wmpent %>% select(-c(hse_cdstatus, sen_cdstatus))
-wmpent <- wmpent %>% filter(cdstatus != "")
+  select(pd_id, wmp_office, party_all, incumbency)
+wmpent <- wmpent %>% filter(incumbency != "")
 fb22 <- left_join(fb22, wmpent, by = "pd_id")
 
 rm(list = ls()[ls() != "fb22"])
@@ -111,7 +105,7 @@ levels(goal_by_topsponsor$`Page Name`)[levels(goal_by_topsponsor$`Page Name`) ==
 color_palette <- c("#882255","#AA4398","#CC6577","#DDCC77","#88CBED","#45AB99","#107633","#322288","#13283E")
 
 ggplot(goal_by_topsponsor, aes(Spend, `Page Name`)) + geom_col(aes(fill = Goal)) + theme_bw() + theme(legend.position = "bottom") + ylab("") + scale_x_continuous(labels = label_number(scale_cut = cut_short_scale())) + scale_fill_manual(values = color_palette)
-ggsave("figures/goal_by_sponsor.pdf", height = 6, width = 7)
+ggsave("figures/goal_by_sponsor.pdf", height = 4, width = 7)
 
 # Top sponsors by goal
 goals <- unique(goal_by_sponsor$name)
