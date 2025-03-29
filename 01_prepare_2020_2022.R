@@ -95,7 +95,7 @@ rm(list = ls())
 # Part 2 cleans up the human coding and merges the respective ads into it
 
 # Input data
-path_input_data <- "data/fb_2022_adid_text_clean.csv.gz"
+path_input_data <- "data/fb_2022_adid_text.csv.gz"
 path_humancoded_input_data <- "data/fb2022_082224_partial.csv"
 path_humancoded_input_data <- "data/FBEL_092924.dta"
 # Output data
@@ -107,10 +107,12 @@ path_humancoded_output_data <- "data/handcoded_2022.csv"
 
 # Load data
 df <- fread(path_input_data, encoding = 'UTF-8')
+df <- df %>% select(-c(ad_creative_bodies, ad_creative_link_captions, ad_creative_link_titles, ad_creative_link_descriptions, checksum))
 
 # Example cleaning for multiple text columns (replace 'text' with your column names)
 df <- df %>%
-  mutate(across(c(ad_creative_body, google_asr_text, aws_ocr_text_img, aws_ocr_text_vid, page_name, disclaimer,
+  mutate(across(c(ad_creative_body, google_asr_text, aws_ocr_text_img, 
+                  aws_ocr_text_vid, page_name, disclaimer,
                   ad_creative_link_caption, ad_creative_link_title, 
                   ad_creative_link_description),
                 ~str_replace_all(., "\\\\n", " ") %>% # Replace newlines with a space
