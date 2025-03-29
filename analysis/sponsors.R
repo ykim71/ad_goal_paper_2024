@@ -55,7 +55,8 @@ print(xtable(non_persuade_sponsors,
              label = "tab:non_persuade_vote_sponsors"),
       "latex",
       "tables/non_persuade_vote_sponsors.tex",
-      include.rownames = F)
+      include.rownames = F,
+      comment = FALSE)
 
 # sponsor % of spend by goal
 # purchase
@@ -73,7 +74,8 @@ print(xtable(purchase_spenders,
              label = "tab:purchase_sponsors"),
       "latex",
       "tables/purchase_sponsors.tex",
-      include.rownames = F)
+      include.rownames = F,
+      comment = FALSE)
 
 # % of sponsor's spend by goal
 # If an ad has multiple goals, spread the spend between them equally
