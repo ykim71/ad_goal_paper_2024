@@ -4,7 +4,7 @@ library(tidyr)
 library(stringr)
 
 bert <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
-fb22_text <- fread("../data/fb2022_prepared.csv.gz", data.table = F)
+fb22_text <- fread("../data/fb2022_inference.csv.gz", data.table = F)
 
 bert <- bert %>% select(ad_id, CONTACT, EVENT)
 fb22_text <- left_join(fb22_text, bert)

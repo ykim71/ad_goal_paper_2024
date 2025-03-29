@@ -16,7 +16,7 @@ rename_strings <- function(x) {
 }
 names(fb22) <- rename_strings(names(fb22))
 fb22$Nogoals <- fb22 %>% select(-ad_id) %>% apply(., 1, function(x){all(x == 0)}) %>% as.numeric()
-fb22_text <- fread("../data/fb2022_prepared.csv.gz", data.table = F)
+fb22_text <- fread("../data/fb2022_inference.csv.gz", data.table = F)
 
 # Number of unique ads
 length(unique(fb22_text$text))

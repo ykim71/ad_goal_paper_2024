@@ -99,6 +99,7 @@ path_input_data <- "data/fb_2022_adid_text.csv.gz"
 path_humancoded_input_data <- "data/fb2022_082224_partial.csv"
 path_humancoded_input_data <- "data/FBEL_092924.dta"
 # Output data
+path_output_data <- "data/fb2022_inference_separate_fields.csv.gz"
 path_output_data <- "data/fb2022_inference.csv.gz"
 path_humancoded_output_data <- "data/handcoded_2022.csv"
 
@@ -109,7 +110,7 @@ path_humancoded_output_data <- "data/handcoded_2022.csv"
 df <- fread(path_input_data, encoding = 'UTF-8')
 df <- df %>% select(-c(ad_creative_bodies, ad_snapshot_url, ad_creative_link_captions, ad_creative_link_titles, ad_creative_link_descriptions, checksum))
 
-# Example cleaning for multiple text columns (replace 'text' with your column names)
+# Clean text fields
 df <- df %>%
   mutate(across(c(ad_creative_body, google_asr_text, aws_ocr_text_img, 
                   aws_ocr_text_vid, page_name, disclaimer,
@@ -119,6 +120,12 @@ df <- df %>%
                   str_squish() %>%                                         # Remove extra spaces
                   na_if("")))                                              # Replace empty strings with NA
 
+# Save text with separate fields (currently only used for example table)
+fwrite(df, path_output_data)
+
+# Concatenate and save again
+df <- df %>%
+  mutate(text = paste(ad_creative_body, google_asr_text, aws_ocr_text_img, aws_ocr_text_vid, page_name, disclaimer, ad_creative_link_caption, ad_creative_link_title, ad_creative_link_description, sep = " "))
 fwrite(df, path_output_data)
 
 #----
