@@ -64,7 +64,11 @@ ggplot(df_goals, aes(time, surv, color = Goal)) +
   theme_bw() +
   labs(x = "Ad runtime (days)", y = "Probability that ad is still running") +
   theme(legend.position = "bottom") +
-  scale_color_manual(values = color_palette)
+  scale_color_manual(values = color_palette) +
+  geom_point(aes(x = 7, y = df_goals$surv[df_goals$Goal == "Event" & df_goals$time == 7]), shape = "x", size = 3, color = "red", show.legend = FALSE) +
+  geom_point(aes(x = 100, y = df_goals$surv[df_goals$Goal == "Purchase" & df_goals$time == 100]), shape = "x", size = 3, color = "red", show.legend = FALSE) +
+  geom_text(aes(x = 7, y = df_goals$surv[df_goals$Goal == "Event" & df_goals$time == 7], label = "Event"), vjust = 2, size = 3, color = "black", show.legend = FALSE) +
+  geom_text(aes(x = 100, y = df_goals$surv[df_goals$Goal == "Purchase" & df_goals$time == 100], label = "Purchase"), vjust = -1, size = 3, color = "black", show.legend = FALSE)
 ggsave("figures/goal_survival.pdf", width = 5.5, height = 5)
 
 
