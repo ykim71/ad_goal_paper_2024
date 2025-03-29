@@ -125,5 +125,14 @@ ggplot(fb22_2, aes(ad_delivery_start_time, smoothed_values, color = name)) +
   theme_bw() +
   scale_color_manual(values = color_palette, name = "Goal") +
   labs(x = "Ad delivery start time", y = "Daily ad spend on goal (as a proportion)") +
-  theme(legend.position = "bottom")
-ggsave("figures/goals_over_time_spline_smoothing.pdf", width = 7, height = 5.5)
+  theme(legend.position = "bottom") +
+  # Manually add labels
+  geom_point(aes(x = as.Date("2022-10-25"), y = fb22_2$smoothed_values[fb22_2$name == "Vote" & fb22_2$ad_delivery_start_time == "2022-10-25"]), shape = "x", size = 3, color = "red", show.legend = FALSE) +
+  geom_point(aes(x = as.Date("2022-09-05"), y = fb22_2$smoothed_values[fb22_2$name == "Contact" & fb22_2$ad_delivery_start_time == "2022-09-05"]), shape = "x", size = 3, color = "red", show.legend = FALSE) +
+  geom_point(aes(x = as.Date("2022-10-10"), y = fb22_2$smoothed_values[fb22_2$name == "Poll" & fb22_2$ad_delivery_start_time == "2022-10-10"]), shape = "x", size = 3, color = "red", show.legend = FALSE) +
+  geom_point(aes(x = as.Date("2022-09-16"), y = fb22_2$smoothed_values[fb22_2$name == "Acquisition" & fb22_2$ad_delivery_start_time == "2022-09-16"]), shape = "x", size = 3, color = "red", show.legend = FALSE) +
+  geom_text(aes(x = as.Date("2022-10-25"), y = fb22_2$smoothed_values[fb22_2$name == "Vote" & fb22_2$ad_delivery_start_time == "2022-10-25"], label = "Vote"), hjust = -0.2, size = 3, show.legend = FALSE) +
+  geom_text(aes(x = as.Date("2022-09-05"), y = fb22_2$smoothed_values[fb22_2$name == "Contact" & fb22_2$ad_delivery_start_time == "2022-09-05"], label = "Contact"), hjust = -0.2, size = 3, show.legend = FALSE) +
+  geom_text(aes(x = as.Date("2022-10-10"), y = fb22_2$smoothed_values[fb22_2$name == "Contact" & fb22_2$ad_delivery_start_time == "2022-10-10"], label = "Poll"), vjust = -3, size = 3, show.legend = FALSE) +
+  geom_text(aes(x = as.Date("2022-09-16"), y = fb22_2$smoothed_values[fb22_2$name == "Acquisition" & fb22_2$ad_delivery_start_time == "2022-09-16"], label = "Acquisition"), vjust = -.6, hjust = -0.025, size = 3, show.legend = FALSE)
+ggsave("figures/goals_over_time_spline_smoothing.pdf", width = 5.5, height = 5)
