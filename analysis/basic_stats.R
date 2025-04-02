@@ -9,16 +9,8 @@ library(scales)
 
 
 fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
-goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
-                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
-rename_strings <- function(x) {
-  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
-}
-names(fb22_pred) <- rename_strings(names(fb22_pred))
 fb22_pred <- fb22_pred %>% select("ad_id", "Acquisition", "Contact", "Donate", "Event", "Learn", "Persuade", "Poll", "Purchase", "Vote")
-
 fb22_pred$`No goals` <- fb22_pred %>% select(-ad_id) %>% apply(., 1, function(x){all(x == 0)}) %>% as.numeric()
-
 
 # Goal count
 # Ignore warning
@@ -67,7 +59,8 @@ print(xt,
       "latex",
       "tables/basic_stats.tex",
       include.rownames = T,
-      format.args = list(big.mark = ",", decimal.mark = "."))
+      format.args = list(big.mark = ",", decimal.mark = "."),
+      comment = F)
 
 # Candidates vs. outside groups
 
@@ -110,13 +103,6 @@ ggsave("figures/goal_by_spontype.pdf", width = 6, height = 2.5)
 
 
 # FB vs Insta
-fb22_vars <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
-fb22_vars <- fb22_vars %>% select(ad_id, page_id, pd_id, spend, publisher_platforms)
-fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
-  apply(., 2, function(x){str_extract(x, "[0-9]+")}) %>%
-  apply(., 1, function(x){mean(as.numeric(x))})
-fb22 <- left_join(fb22_pred, fb22_vars, by = "ad_id")
-
 ngoals <- fb22 %>% select(Acquisition:`No goals`) %>% apply(., 1, sum)
 spenddistr <- fb22$spend/ngoals
 spend_by_goal <- fb22 %>% select(Acquisition:`No goals`)
@@ -130,6 +116,7 @@ platform_goals <- platform_goals %>% select(-`No goals`)
 platform_goals <- pivot_longer(platform_goals, -publisher_platforms)
 
 names(platform_goals) <- c("Platform", "Goal", "Spend")
+platform_goals$Platform <- unlist(platform_goals$Platform)
 platform_goals$Platform <- platform_goals$Platform %>% case_match("facebook" ~ "Facebook", "instagram" ~ "Instagram")
 platform_goals$Goal <- factor(platform_goals$Goal, levels = c(names(fb22_pred)[-1]))
 
@@ -148,4 +135,3 @@ ggplot(platform_goals, aes(x = Goal, y = Spend, fill = Platform)) +
     legend.key.size = unit(0.3, "cm")
   )
 ggsave("figures/goal_by_platform.pdf", width = 6, height = 2.5)
-
