@@ -12,24 +12,11 @@ library(RColorBrewer)
 
 fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
 
-goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
-                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
-rename_strings <- function(x) {
-  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
-}
-
-names(fb22_pred) <- rename_strings(names(fb22_pred))
-
-
 # Combine relevant vars from multiple datasets
 load("../data/fb_2022_adid_var_clean.rdata")
-fb22_vars <- fb22_vars %>% select(ad_id, page_id, pd_id, spend)
+fb22_vars <- fb22_vars %>% select(ad_id, pd_id, page_name, spend)
 
-fb22_vars2 <- fread("../../fb_2022/fb_2022_adid_text.csv.gz", data.table = F)
-fb22_vars2 <- fb22_vars2 %>% select(ad_id, page_name)
-
-fb22 <- left_join(fb22_vars, fb22_vars2, by = "ad_id")
-fb22 <- left_join(fb22, fb22_pred, by = "ad_id")
+fb22 <- left_join(fb22_vars, fb22_pred, by = "ad_id")
 
 # Add party & incumbency
 load("../data/wmpentities_2022.rdata")
@@ -199,10 +186,10 @@ ggsave("figures/goal_by_party_prop.pdf", width = 6, height = 2.5)
 # By incumbency
 
 goal_by_incumbency <- fb22_spend_by_goal_cand %>%
-  group_by(cdstatus) %>%
+  group_by(incumbency) %>%
   summarise(across(c(Donate:Persuade), sum))
 
-goal_by_incumbency <- pivot_longer(goal_by_incumbency, -cdstatus)
+goal_by_incumbency <- pivot_longer(goal_by_incumbency, -incumbency)
 
 names(goal_by_incumbency) <- c("Incumbency", "Goal", "Spend")
 goal_by_incumbency$Incumbency <- str_to_title(goal_by_incumbency$Incumbency)
@@ -231,13 +218,13 @@ goal_by_incumbency_prop <- fb22_spend_by_goal_cand %>%
   summarise(across(c(Donate:Persuade), sum))
 goal_by_incumbency_prop[,2:ncol(goal_by_incumbency_prop)] <- goal_by_incumbency_prop[,2:ncol(goal_by_incumbency_prop)]/apply(goal_by_incumbency_prop[,2:ncol(goal_by_incumbency_prop)], 1, sum)
 goal_by_incumbency_prop <- goal_by_incumbency_prop[is.na(goal_by_incumbency_prop$Donate) == F,]
-goal_by_incumbency_prop <- left_join(goal_by_incumbency_prop, fb22_spend_by_goal_cand %>% select(pd_id, cdstatus))
+goal_by_incumbency_prop <- left_join(goal_by_incumbency_prop, fb22_spend_by_goal_cand %>% select(pd_id, incumbency))
 goal_by_incumbency_prop <- 
   goal_by_incumbency_prop %>%
-  group_by(cdstatus) %>%
+  group_by(incumbency) %>%
   summarise(across(c(Donate:Persuade), mean))
 
-goal_by_incumbency_prop <- pivot_longer(goal_by_incumbency_prop, -cdstatus)
+goal_by_incumbency_prop <- pivot_longer(goal_by_incumbency_prop, -incumbency)
 
 names(goal_by_incumbency_prop) <- c("Incumbency", "Goal", "Spend")
 goal_by_incumbency_prop$Incumbency <- str_to_title(goal_by_incumbency_prop$Incumbency)
