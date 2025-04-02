@@ -6,10 +6,10 @@ library(stringr)
 bert <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
 fb22_text <- fread("../data/fb2022_inference.csv.gz", data.table = F)
 
-bert <- bert %>% select(ad_id, CONTACT, EVENT)
+bert <- bert %>% select(ad_id, Contact, Event)
 fb22_text <- left_join(fb22_text, bert)
-contact_ads <- fb22_text %>% filter(CONTACT == 1)
-event_ads <- fb22_text %>% filter(EVENT == 1)
+contact_ads <- fb22_text %>% filter(Contact == 1)
+event_ads <- fb22_text %>% filter(Event == 1)
 
 set.seed(123)
 contact_sample_ids <- sample(1:nrow(contact_ads), 10)
