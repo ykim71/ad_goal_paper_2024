@@ -27,6 +27,3 @@ mat_combined[lower.tri(mat_combined)] <- cor_matrix2[lower.tri(cor_matrix2)]
 diag(mat_combined) <- NA
 ggcorrplot(mat_combined, method = "circle")
 ggsave("figures/goal_overlap.pdf", height = 6, width = 6)
-
-
-
