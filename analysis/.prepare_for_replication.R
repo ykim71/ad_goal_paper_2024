@@ -3,7 +3,7 @@ library(dplyr)
 library(stringr)
 
 fb22_vars <- fread("../data/fb_2022_adid_var.csv.gz", data.table = F)
-fb22_vars <- fb22_vars %>% select(ad_id, page_name, pd_id, publisher_platforms, ad_delivery_start_time, ad_delivery_stop_time, spend, region_distribution)
+fb22_vars <- fb22_vars %>% select(ad_id, page_name, pd_id, publisher_platforms, ad_delivery_start_time, ad_delivery_stop_time, spend, region_distribution, demographic_distribution)
 
 fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
   apply(., 2, function(x){str_extract(x, "[0-9]+")}) %>%
@@ -17,6 +17,7 @@ fb22_vars$publisher_platforms <- str_split(fb22_vars$publisher_platforms, ",")
 
 
 #----
+# Region
 
 extract_region <- function(x){
   
