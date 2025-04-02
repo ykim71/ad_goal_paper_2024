@@ -8,7 +8,7 @@ library(dplyr)
 library(stringr)
 
 load("../data/fb_2022_adid_var_clean.rdata")
-fb22_vars <- fb22_vars %>% select(ad_id, page_id, pd_id, spend)
+fb22_vars <- fb22_vars %>% select(ad_id, pd_id, spend)
 
 load("../data/wmpentities_2022.rdata")
 wmpent <- wmpent %>% 
