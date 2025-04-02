@@ -1,6 +1,15 @@
+# The purpose of this file is to take get everything ready for the replication
+# Anyone wishing to run this repo should not need to run this file
+# It turns WMP-internal files and files over 100Mb into replication-ready files
+# One reason it is still included is the conversion of the age variable
+#  which should be transparent to anyone who is interested
+
 library(data.table)
 library(dplyr)
 library(stringr)
+library(jsonlite)
+library(parallel)
+library(pbapply)
 
 fb22_vars <- fread("../data/fb_2022_adid_var.csv.gz", data.table = F)
 fb22_vars <- fb22_vars %>% select(ad_id, page_name, pd_id, publisher_platforms, ad_delivery_start_time, ad_delivery_stop_time, spend, region_distribution, demographic_distribution)
@@ -47,9 +56,45 @@ ads_region <- rbindlist(ads_region)
 save(ads_region, file = "../data/ads_region.rdata")
 
 #----
+# Age
 
-# Now that region has been split out, remove it from main df and save it
-fb22_vars <- fb22_vars %>% select(-region_distribution)
+# Extract age data from the json
+
+extract_age <- function(x){
+  
+  json_str <- str_replace_all(x, "\"\"", "\"")
+  df_demographic <- fromJSON(json_str)
+  df_demographic$percentage <- as.numeric(df_demographic$percentage)
+  df_demographic <- df_demographic %>% group_by(age) %>% summarize(percentage = sum(percentage))
+  
+  age_equivalents <- data.frame(
+    age_group = c("13-17", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"),
+    age = c(15, 21, 29.5, 39.5, 49.5, 59.5, 69.5)
+  )
+  
+  df_demographic$age <- age_equivalents$age[match(df_demographic$age, age_equivalents$age_group)]
+  ad_demographic <- sum(df_demographic$age*df_demographic$percentage)
+  
+  return(ad_demographic)
+}
+
+test <- fb22_vars[fb22_vars$demographic_distribution != "",]
+
+cl <- makeCluster(12L)
+clusterExport(cl, c("str_replace_all", "fromJSON", "%>%", "summarize", "group_by"))
+ads_age <- pblapply(cl = cl, test$demographic_distribution, extract_age)
+stopCluster(cl)
+
+test$age <- unlist(ads_age)
+ads_age <- test %>% select(ad_id, age)
+save(ads_age, file = "../data/ads_age.rdata")
+
+
+#----
+
+# Now that region and age have been split out, remove them from main df and save it
+# This keeps the file small
+fb22_vars <- fb22_vars %>% select(-c(region_distribution, demographic_distribution))
 save(fb22_vars, file = "../data/fb_2022_adid_var_clean.rdata")
 
 #----
