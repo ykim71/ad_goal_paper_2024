@@ -8,58 +8,13 @@ library(scales)
 library(ggplot2)
 library(RColorBrewer)
 
-fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
-
-goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
-                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
-rename_strings <- function(x) {
-  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
-}
-
-names(fb22_pred) <- rename_strings(names(fb22_pred))
-
-
 # Combine relevant vars from multiple datasets
-fb22_vars <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
-fb22_vars <- fb22_vars %>% select(ad_id, page_id, pd_id, spend)
-fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
-  apply(., 2, function(x){str_extract(x, "[0-9]+")}) %>%
-  apply(., 1, function(x){mean(as.numeric(x))})
-
-fb22_vars2 <- fread("../../fb_2022/fb_2022_adid_text.csv.gz", data.table = F)
-fb22_vars2 <- fb22_vars2 %>% select(ad_id, page_name)
-
-fb22 <- left_join(fb22_vars, fb22_vars2, by = "ad_id")
-fb22 <- left_join(fb22, fb22_pred, by = "ad_id")
-
+fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
+load("../data/fb_2022_adid_var_clean.rdata")
+fb22 <- left_join(fb22_vars, fb22_pred, by = "ad_id")
 rm(list = ls()[ls() != "fb22"])
 
-#----
-
-extract_region <- function(x){
-  
-  json_str <- str_replace_all(x, "\"\"", "\"")
-  df_region <- fromJSON(json_str)
-  df_region$percentage <- as.numeric(df_region$percentage)
-  df_region$region[!df_region$region %in% state.name] <- "Other"
-  df_region <- df_region %>% group_by(region) %>% summarize(percentage = sum(percentage))
-  
-  return(df_region)
-}
-
-# Ad-level metadata
-fb22_vars <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
-fb22_vars <- fb22_vars[fb22_vars$region_distribution != "",]
-ads_region <- pblapply(fb22_vars$region_distribution, extract_region)
-
-add_new_column <- function(df, value) {
-  df$ad_id <- value
-  return(df)
-}
-
-# Long dataframe, % of each region per ad
-ads_region <- mapply(add_new_column, ads_region, fb22_vars$ad_id, SIMPLIFY = F)
-ads_region <- rbindlist(ads_region)
+load("../data/ads_region.rdata")
 
 #----
 # Merge into ad-level
@@ -138,8 +93,9 @@ turnout <- turnout %>%
 goal_by_state <- goal_by_state[rownames(goal_by_state) != "Other",]
 goal_by_state <- goal_by_state/turnout$TOTAL_BALLOTS_COUNTED
 
-#goal_by_state_prop <- goal_by_state/apply(goal_by_state, 1, sum)
-#goal_by_state_prop$state <- tolower(rownames(goal_by_state_prop))
+# goal_by_state_prop <- goal_by_state/apply(goal_by_state, 1, sum)
+# goal_by_state_prop$state <- tolower(rownames(goal_by_state_prop))
+
 goal_by_state$state <- tolower(rownames(goal_by_state))
 
 us_map_colors1 <- merge(us_map, goal_by_state, by.x = "region", by.y = "state", all.x = TRUE)
@@ -158,16 +114,16 @@ for(g in 1:length(unique_labels)) {
   ggsave(paste0("figures/map_", unique_labels[g], ".pdf"), width = 7, height = 4.5)
 }
 
-us_map_colors2 <- merge(us_map, goal_by_state_prop, by.x = "region", by.y = "state", all.x = TRUE)
-us_map_colors2 <- us_map_colors2[order(us_map_colors2$order),]
-
-# Prop of ad spending to a state by a given goal
-for(g in 1:length(unique_labels)) {
-  ggplot() +
-    geom_polygon(data = us_map_colors2, aes_string(x = "long", y = "lat", group = "group", fill = unique_labels[g]), color = "black") +
-    scale_fill_gradient(low = "white", high = color_palette[g], name = unique_labels[g]) +
-    theme_void() +
-    theme(legend.position = "bottom")
-  #ggsave(paste0("figures/map_", unique_labels[g], "_prop.pdf"), width = 7, height = 4.5)
-}
+# us_map_colors2 <- merge(us_map, goal_by_state_prop, by.x = "region", by.y = "state", all.x = TRUE)
+# us_map_colors2 <- us_map_colors2[order(us_map_colors2$order),]
+# 
+# # Prop of ad spending to a state by a given goal
+# for(g in 1:length(unique_labels)) {
+#   ggplot() +
+#     geom_polygon(data = us_map_colors2, aes_string(x = "long", y = "lat", group = "group", fill = unique_labels[g]), color = "black") +
+#     scale_fill_gradient(low = "white", high = color_palette[g], name = unique_labels[g]) +
+#     theme_void() +
+#     theme(legend.position = "bottom")
+#   ggsave(paste0("figures/map_", unique_labels[g], "_prop.pdf"), width = 7, height = 4.5)
+# }
 
