@@ -10,29 +10,13 @@ library(zoo)
 
 fb22_pred <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
 
-goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
-                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
-rename_strings <- function(x) {
-  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
-}
-
-names(fb22_pred) <- rename_strings(names(fb22_pred))
-
-
 # Combine relevant vars from multiple datasets
-fb22_vars <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
+load("../data/fb_2022_adid_var_clean.rdata")
 # Only consider ads with start dates from Sep. 5 onwards
 fb22_vars <- fb22_vars[as.Date(fb22_vars$ad_delivery_start_time) >= as.Date("2022-09-05"),]
-fb22_vars <- fb22_vars %>% select(ad_id, page_id, pd_id, spend, ad_delivery_start_time)
-fb22_vars$spend <- str_split_fixed(fb22_vars$spend, ",", 2) %>%
-  apply(., 2, function(x){str_extract(x, "[0-9]+")}) %>%
-  apply(., 1, function(x){mean(as.numeric(x))})
+fb22_vars <- fb22_vars %>% select(ad_id, pd_id, page_name, spend, ad_delivery_start_time)
 
-fb22_vars2 <- fread("../../fb_2022/fb_2022_adid_text.csv.gz", data.table = F)
-fb22_vars2 <- fb22_vars2 %>% select(ad_id, page_name)
-
-fb22 <- left_join(fb22_vars, fb22_vars2, by = "ad_id")
-fb22 <- left_join(fb22, fb22_pred, by = "ad_id")
+fb22 <- left_join(fb22_vars, fb22_pred, by = "ad_id")
 
 rm(list = ls()[ls() != "fb22"])
 
