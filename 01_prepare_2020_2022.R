@@ -96,7 +96,6 @@ rm(list = ls())
 
 # Input data
 path_input_data <- "data/fb_2022_adid_text.csv.gz"
-path_humancoded_input_data <- "data/fb2022_082224_partial.csv"
 path_humancoded_input_data <- "data/FBEL_092924.dta"
 # Output data
 path_output_data1 <- "data/fb2022_inference.csv.gz"
