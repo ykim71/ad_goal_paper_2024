@@ -6,7 +6,8 @@ library(survival)
 library(ggplot2)
 library(RColorBrewer)
 
-var1 <- fread("../data/fb_2022_adid_var1.csv.gz", data.table = F)
+load("../data/fb_2022_adid_var_clean.rdata")
+var1 <- fb22_vars
 
 # Count number of ads running from before 2022-09-05 (mentioned in footnote)
 length(which(as.Date(var1$ad_delivery_start_time) < as.Date("2022-09-05")))
@@ -17,12 +18,6 @@ var1$ad_delivery_stop_time[is.na(var1$ad_delivery_stop_time)] <- "2022-11-08"
 
 
 bert <- fread("../data/fb2022_predicted_goals_bert_all.csv.gz", data.table = F)
-goal_names <- data.frame(wrong = c("DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"),
-                         correct = c("Donate", "Contact", "Purchase", "Vote", "Event", "Poll", "Acquisition", "Learn", "Persuade"))
-rename_strings <- function(x) {
-  ifelse(x %in% goal_names$wrong, goal_names$correct[match(x, goal_names$wrong)], x)
-}
-names(bert) <- rename_strings(names(bert))
 
 var1$duration <- (var1$ad_delivery_stop_time - var1$ad_delivery_start_time)+1
 bert <- bert[is.na(var1$duration) == F,]
