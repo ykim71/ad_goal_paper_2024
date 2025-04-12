@@ -1,3 +1,5 @@
+# Rows 1 and 2 of Table 2 in the paper
+
 library(ggcorrplot)
 library(haven)
 library(dplyr)
@@ -13,4 +15,7 @@ rename_strings <- function(x) {
 }
 names(df) <- rename_strings(names(df))
 
-df %>% group_by(year) %>% summarize(across(Donate:Persuade, sum))
+# reorder columns except year alphabetically
+df <- df %>% select(year, sort(names(df)[-10]))
+
+df %>% group_by(year) %>% summarize(across(Acquisition:Vote, sum))
