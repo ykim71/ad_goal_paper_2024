@@ -56,7 +56,13 @@ for(i in 1:length(goal_names)){
 sampled_ads_df <- do.call(rbind, sampled_ads)
 sampled_ads_df <- sampled_ads_df %>% select(-sampled_ad_adid)
 names(sampled_ads_df) <- c("Goal", "Page Name", "Ad")
+sampled_ads_df <- sampled_ads_df[order(sampled_ads_df$Goal),]
 
 xt <- xtable(sampled_ads_df, caption = "Example ads for each predicted goal. The ads were randomly sampled from candidate ads whose ad creative body was between 50 and 200 characters (to fit the page), weighted by ad spend.", label = "tab:example_ads")
 align(xt) <- c("l", "l", "l", "p{10cm}")
-print(xt, include.rownames = F, , sanitize.text.function = function(x) { x })
+print(xt, 
+      "latex",
+      "tables/example_ads.tex",
+      include.rownames = F,
+      sanitize.text.function = function(x) { x },
+      comment = F)
