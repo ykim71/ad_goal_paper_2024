@@ -29,6 +29,9 @@ goal_count$Sum <- as.numeric(goal_count$Sum)
 load("../data/fb_2022_adid_var_clean.rdata")
 fb22 <- left_join(fb22_pred, fb22_vars, by = "ad_id")
 
+# Total spend
+sum(fb22$spend)
+
 ngoals <- fb22 %>% select(Acquisition:`No goals`) %>% apply(., 1, sum)
 spenddistr <- fb22$spend/ngoals
 spend_by_goal <- fb22 %>% select(Acquisition:`No goals`)
@@ -103,6 +106,9 @@ ggsave("figures/goal_by_spontype.pdf", width = 6, height = 2.5)
 
 
 # FB vs Insta
+# Count ads that are purely FB (82583) or IG (17222)
+fb22_vars %>% filter(publisher_platforms %in% c("facebook", "instagram")) %>% count(publisher_platforms)
+# Make plot
 ngoals <- fb22 %>% select(Acquisition:`No goals`) %>% apply(., 1, sum)
 spenddistr <- fb22$spend/ngoals
 spend_by_goal <- fb22 %>% select(Acquisition:`No goals`)

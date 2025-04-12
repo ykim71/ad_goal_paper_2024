@@ -127,6 +127,9 @@ goal_var <- aggregate(goal_by_top100sponsor$value, by = list(goal_by_top100spons
 
 fb22_spend_by_goal_cand <- fb22_spend_by_goal %>% filter(is.na(wmp_office) == F)
 
+# Number of candidates, mentioned in paper
+length(unique(fb22_spend_by_goal_cand$page_name))
+
 goal_by_party <- fb22_spend_by_goal_cand %>%
   group_by(party_all) %>%
   summarise(across(c(Donate:Persuade), sum)) %>%
