@@ -28,12 +28,20 @@ fb22_age_df$ad_id <- fb22_age$ad_id
 fb22_age_df <- fb22_age_df %>% pivot_longer(-ad_id, names_to = "Goal", values_to = "Age")
 fb22_age_df <- fb22_age_df[fb22_age_df$Age != 0,]
 fb22_age_df <- fb22_age_df[is.na(fb22_age_df$Age) == F,]
+fb22_age_df <- left_join(fb22_age_df, fb22_age %>% select(ad_id, spend), by = "ad_id")
+wm <- fb22_age_df %>%
+  group_by(Goal) %>%
+  summarize(wmean = weighted.mean(Age, spend, na.rm = TRUE))
 
 # Figure 3
 ggplot(fb22_age_df, aes(Age)) + 
-  geom_density() + 
-  stat_summary(aes(xintercept = ..x.., y = 0), fun = mean, geom = "vline", orientation = "y", color = "darkgray") +
-  stat_summary(aes(label = ..x.., y = 0.09), fun = function(x){round(mean(x), 2)}, geom = "text", orientation = "y", color = "darkgray", hjust = 1.1) +
+  geom_density(aes(weight = spend), adjust = 2) + 
+  geom_vline(data = wm, aes(xintercept = wmean), color = "darkgray") +
+  geom_text(
+    data = wm,
+    aes(x = wmean, y = 0.08, label = round(wmean, 2)),
+    color = "darkgray", hjust = 1.1
+  ) +
   facet_wrap(~Goal) +
   theme_bw() +
   labs(y = "")
