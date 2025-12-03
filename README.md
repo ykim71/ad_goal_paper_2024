@@ -1,6 +1,6 @@
 # Replication Archive - Goals of US Election Ads
 Replication archive for the paper:
-> Neumann, Markus, Sebastian Zimmeck, Jielu Yao, Erika Franklin Fowler, Michael Franz, Breeze Floyd, and Travis Nelson Ridout. **"The Strategic Goals of US Election Ads on Social Media: A Descriptive Study of the 2022 Midterms."** *Journal of Quantitative Description: Digital Media* 5 (2025): 1–38.
+> Neumann, Markus, Sebastian Zimmeck, Jielu Yao, Erika Franklin Fowler, Michael Franz, Breeze Floyd, and Travis Nelson Ridout. **"The Strategic Goals of US Election Ads on Social Media: A Descriptive Study of the 2022 Midterms."** *Journal of Quantitative Description: Digital Media* 5 (2025): 1–37.
 
 ## Figures and Tables
 The scripts to replicate the tables and figures in the paper are located in `analysis`. Specifically:
