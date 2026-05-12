@@ -4,8 +4,8 @@ import numpy as np
 
 results_dir = 'performance'
 
-test = pd.read_csv('data/test_2020_2022.csv')
-test_pred = pd.read_csv('data/test_predictions_bert.csv')
+test = pd.read_csv('data/test_2020_2022_2024.csv')
+test_pred = pd.read_csv('data/test_predictions_bert_2024.csv')
 
 model_name = 'bert'
 
@@ -23,11 +23,11 @@ for g in goals:
   df_perf.to_csv(results_dir + "/" + model_name + "/" + g + '.csv')
   
   df_combined_perf.at[0,g] = df_perf.iloc[2,1]
-  df_combined_perf_weighted_f1.at[0,g] = df_perf['weighted_avg'][2]
+  df_combined_perf_weighted_f1.at[0,g] = df_perf['weighted_avg'].iloc[2]
   
 
-df_combined_perf.to_csv("performance/bert_2020_2022_feature_comparison_class1.csv")
-df_combined_perf_weighted_f1.to_csv("performance/bert_2020_2022_feature_comparison_weighted.csv")
+df_combined_perf.to_csv("performance/bert_2020_2022_2024_feature_comparison_class1.csv")
+df_combined_perf_weighted_f1.to_csv("performance/bert_2020_2022_2024_feature_comparison_weighted.csv")
 
 
 # Calculate micro F1 score and then weigh by support
@@ -43,6 +43,7 @@ for g in goals:
 
 # Concatenate the list of DataFrames
 combined_df = pd.concat(combined_micro_f1)
+combined_df.to_csv("performance/bert_2020_2022_2024_combined_micro_f1.csv")
 
 weighted_micro_f1 = (combined_df['micro_f1']*combined_df['support']).sum()/combined_df['support'].sum()
 

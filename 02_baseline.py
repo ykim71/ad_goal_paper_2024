@@ -13,7 +13,7 @@ from joblib import dump, load
 import os
 
 # Read in the data
-df = pd.read_csv('data/humancoded_2020_2022.csv.gz', encoding = 'UTF-8')
+df = pd.read_csv('data/humancoded_2020_2022_2024.csv.gz', encoding = 'UTF-8')
 
 # Split
 train, test = ms.train_test_split(df, test_size=0.2, random_state=123, stratify = df['year'])
@@ -29,24 +29,24 @@ clf_rf = Pipeline([('vect', CountVectorizer()),
 ])
 
 
-model_name = 'rf_2020_2022_separate'
+model_name = 'rf_2020_2022_2024_separate'
 os.makedirs(os.path.dirname(results_dir + "/" + model_name + "/"), exist_ok=True)
 
 goals = ["DONATE", "CONTACT", "PURCHASE", "GOTV", "EVENT", "POLL", "GATHERINFO", "LEARNMORE", "PRIMARY_PERSUADE"]
 
 # Try out different ways to concatenate
-text_order1 = ['ad_creative_body', 'asr', 'ocr', 'ocr_vid']
-text_order2 = ['ad_creative_body', 'asr', 'ocr', 'ocr_vid', 'page_name', 'disclaimer', 'ad_creative_link_caption', 'ad_creative_link_title', 'ad_creative_link_description']
+text_order1 = ['ad_creative_body', 'ad_text', 'asr', 'asr_text', 'ocr', 'ocr_text', 'ocr_vid']
+text_order2 = ['ad_creative_body', 'ad_text', 'asr', 'asr_text', 'ocr', 'ocr_text', 'ocr_vid', 'page_name', 'disclaimer', 'funding_entity', 'advertiser_name', 'ad_creative_link_caption', 'ad_creative_link_title', 'ad_creative_link_description']
 
 train['combined_text'] = train[text_order1].apply(lambda row: ' '.join(row.dropna().astype(str).replace('', None).dropna()), axis=1)
 test['combined_text'] = test[text_order1].apply(lambda row: ' '.join(row.dropna().astype(str).replace('', None).dropna()), axis=1)
 train['combined_everything'] = train[text_order2].apply(lambda row: ' '.join(row.dropna().astype(str).replace('', None).dropna()), axis=1)
 test['combined_everything'] = test[text_order2].apply(lambda row: ' '.join(row.dropna().astype(str).replace('', None).dropna()), axis=1)
 
-train.to_csv('data/train_2020_2022.csv', index = False)
-test.to_csv('data/test_2020_2022.csv', index = False)
+train.to_csv('data/train_2020_2022_2024.csv', index = False)
+test.to_csv('data/test_2020_2022_2024.csv', index = False)
 
-fields = ['ad_creative_body', 'combined_text', 'combined_everything']
+fields = ['combined_text', 'combined_everything']
 
 df_combined_perf = pd.DataFrame(np.nan, index=fields, columns=goals)
 df_combined_perf_weighted_f1 = pd.DataFrame(np.nan, index=fields, columns=goals)
@@ -78,7 +78,7 @@ for f in fields:
       dump(clf_rf, 'models/goal_rf_' + g + "_" + f + '.joblib', compress = 3)
 
 
-df_combined_perf.to_csv("performance/rf_2020_2022_feature_comparison_class1.csv")
-df_combined_perf_weighted_f1.to_csv("performance/rf_2020_2022_feature_comparison_weighted.csv")
+df_combined_perf.to_csv("performance/rf_2020_2022_2024_feature_comparison_class1.csv")
+df_combined_perf_weighted_f1.to_csv("performance/rf_2020_2022_2024_feature_comparison_weighted.csv")
 
 
