@@ -1,0 +1,5 @@
+,0,1,weighted_avg
+Precision,0.97,0.83,0.963
+Recall,0.995,0.444,0.967
+F-Score,0.983,0.579,0.962
+Support,1818.0,99.0,
